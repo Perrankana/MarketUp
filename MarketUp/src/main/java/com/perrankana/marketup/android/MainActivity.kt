@@ -3,30 +3,29 @@ package com.perrankana.marketup.android
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.perrankana.marketup.DashboardData
-import com.perrankana.marketup.Greeting
+import com.perrankana.marketup.android.compose.DashboardScene
+import com.perrankana.marketup.android.compose.MarketUpApp
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             MyApplicationTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colors.background
-                ) {
-                    DashboardView(
-                        dashboardData = DashboardData(null),
-                        onEvent = {},
-                        onStock = {},
-                        onProfile = {}
-                    )
-                }
+                MarketUpApp()
+//                Surface(
+//                    modifier = Modifier.fillMaxSize(),
+//                    color = MaterialTheme.colors.background
+//                ) {
+//                    DashboardView(
+//                        onEvent = {},
+//                        onStock = {},
+//                        onProfile = {}
+//                    )
+//                }
             }
         }
     }
@@ -36,8 +35,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun DefaultPreview() {
     MyApplicationTheme {
-        DashboardView(
-            dashboardData = DashboardData(null),
+        DashboardScene(
             onEvent = {},
             onStock = {},
             onProfile = {}

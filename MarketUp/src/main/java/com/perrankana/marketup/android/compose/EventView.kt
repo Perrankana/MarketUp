@@ -1,4 +1,4 @@
-package com.perrankana.marketup.android
+package com.perrankana.marketup.android.compose
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -11,6 +11,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -20,14 +21,22 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.perrankana.marketup.DashboardData
+import com.perrankana.marketup.android.viewmodels.DashboardViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.runtime.livedata.observeAsState
+import com.perrankana.marketup.android.MyApplicationTheme
+import com.perrankana.marketup.android.R
+import com.perrankana.marketup.android.viewmodels.CurrentEventViewModel
 
 @Composable
-fun DashboardView(
-    dashboardData: DashboardData,
+fun EventView(
+    currentEventViewModel: CurrentEventViewModel = hiltViewModel(),
     onStock: () -> Unit,
     onEvent: () -> Unit,
     onProfile: () -> Unit) {
+
+    val dashboardData by currentEventViewModel.currentEventData.observeAsState()
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -57,8 +66,10 @@ fun DashboardView(
                 onClick = { onStock() }) {
                 Text(text = stringResource(id = R.string.stock))
             }
-            Button(onClick = { onEvent() }) {
-                Text(text = dashboardData.eventName ?: stringResource(id = R.string.create_event))
+            Button(onClick = {
+                onEvent()
+            }) {
+                Text(text = dashboardData?.eventName ?: stringResource(id = R.string.create_event))
             }
         }
     }
@@ -66,10 +77,9 @@ fun DashboardView(
 
 @Preview
 @Composable
-fun DashboardPreview() {
+fun EventPreview() {
     MyApplicationTheme {
-        DashboardView(
-            dashboardData = DashboardData(null),
+        EventView(
             onEvent = {},
             onStock = {},
             onProfile = {}
