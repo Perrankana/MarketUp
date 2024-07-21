@@ -1,10 +1,8 @@
 package com.perrankana.marketup.android.compose
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.Button
@@ -16,7 +14,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -24,44 +21,58 @@ import androidx.compose.ui.unit.dp
 import com.perrankana.marketup.android.viewmodels.DashboardViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import com.perrankana.marketup.DashboardData
 import com.perrankana.marketup.android.MyApplicationTheme
 import com.perrankana.marketup.android.R
-import com.perrankana.marketup.android.viewmodels.CurrentEventViewModel
 
 @Composable
-fun EventView(
-    currentEventViewModel: CurrentEventViewModel = hiltViewModel(),
+fun DashboardScene(
     onStock: () -> Unit,
     onEvent: () -> Unit,
-    onProfile: () -> Unit) {
+    onProfile: () -> Unit
+) {
 
-    val dashboardData by currentEventViewModel.currentEventData.observeAsState()
+    val dashboardViewModel: DashboardViewModel = hiltViewModel()
+    val dashboardData by dashboardViewModel.dashboardData.observeAsState()
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .fillMaxHeight()
-            .padding(all = 20.dp)
-    ) {
-        Button(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .background(Color.Transparent),
-            onClick = { onProfile() }) {
-            Icon(
-                imageVector = ImageVector.vectorResource(R.drawable.face),
-                contentDescription = stringResource(id = R.string.profile),
-                tint = colorResource(id = R.color.icon_color)
-            )
+    DashboardView(dashboardData = dashboardData, onStock = onStock, onEvent = onEvent, onProfile = onProfile)
+}
+
+@Composable
+fun DashboardView(
+    dashboardData: DashboardData?,
+    onStock: () -> Unit,
+    onEvent: () -> Unit,
+    onProfile: () -> Unit
+) {
+    BackgroundCard(
+        cornerButton = {
+            Button(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .background(Color.Transparent)
+                    .padding(20.dp),
+                onClick = { onProfile() }) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(R.drawable.face),
+                    contentDescription = stringResource(id = R.string.profile),
+                )
+            }
         }
-
+    ) {
         Column(
             modifier = Modifier
-                .align(Alignment.BottomCenter)
                 .wrapContentWidth()
-                .padding(bottom = 40.dp),
+                .padding(start = 20.dp, end = 20.dp, bottom = 40.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Image(
+                painter = painterResource(id = R.drawable.img_2211),
+                contentDescription = "",
+                contentScale = ContentScale.Fit
+            )
             Button(
                 onClick = { onStock() }) {
                 Text(text = stringResource(id = R.string.stock))
@@ -77,9 +88,10 @@ fun EventView(
 
 @Preview
 @Composable
-fun EventPreview() {
+fun DashboardPreview() {
     MyApplicationTheme {
-        EventView(
+        DashboardView(
+            dashboardData = DashboardData(),
             onEvent = {},
             onStock = {},
             onProfile = {}

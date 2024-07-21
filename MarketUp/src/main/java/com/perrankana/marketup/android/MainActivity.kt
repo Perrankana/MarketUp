@@ -16,16 +16,6 @@ class MainActivity : ComponentActivity() {
         setContent {
             MyApplicationTheme {
                 MarketUpApp()
-//                Surface(
-//                    modifier = Modifier.fillMaxSize(),
-//                    color = MaterialTheme.colors.background
-//                ) {
-//                    DashboardView(
-//                        onEvent = {},
-//                        onStock = {},
-//                        onProfile = {}
-//                    )
-//                }
             }
         }
     }

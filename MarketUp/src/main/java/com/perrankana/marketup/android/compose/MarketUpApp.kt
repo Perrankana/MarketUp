@@ -28,7 +28,13 @@ fun MarketUpNavHost(
             )
         }
         composable(route = Screen.Event.route) {
-
+            EventScene()
+        }
+        composable(route = Screen.Stock.route) {
+            StockScene()
+        }
+        composable(route = Screen.Profile.route) {
+            ProfileScene()
         }
     }
 }
