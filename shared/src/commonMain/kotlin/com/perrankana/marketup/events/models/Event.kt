@@ -1,4 +1,4 @@
-package com.perrankana.marketup.models
+package com.perrankana.marketup.events.models
 
 data class Event(
     val name: String,

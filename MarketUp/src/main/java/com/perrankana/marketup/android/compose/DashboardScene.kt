@@ -23,7 +23,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import com.perrankana.marketup.DashboardData
+import com.perrankana.marketup.dashboard.DashboardData
 import com.perrankana.marketup.android.MyApplicationTheme
 import com.perrankana.marketup.android.R
 

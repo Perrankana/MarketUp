@@ -1,6 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">MarketUp</string>
+    <!-- DASHBOARD -->
     <string name="create_event">Create Event</string>
     <string name="stock">Stock</string>
-    <string name="profile">profile</string>
+    <string name="profile">Profile</string>
+
+    <!-- STOCK -->
+    <!-- Empty Stock -->
+    <string name="empty_stock">Your stock is empty. Add new products to your stock</string>
+    <string name="add_product">Add Product</string>
+    <!-- New Product -->
+    <string name="save_product">Save Product</string>
+    <string name="name">Name</string>
+    <string name="category">Category</string>
+    <string name="format">Format</string>
+    <string name="cost">Cost</string>
+    <string name="price">Sell Price</string>
+    <string name="offers">Offers</string>
 </resources>
