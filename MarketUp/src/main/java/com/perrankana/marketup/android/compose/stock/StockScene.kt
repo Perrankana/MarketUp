@@ -27,11 +27,16 @@ fun StockScene() {
     val stockViewModel: StockViewModel = hiltViewModel()
     val stockSceneData by stockViewModel.stockSceneData.observeAsState()
 
-    when (stockSceneData) {
-        NewProduct -> NewProductView(
-            categoriesList = listOf("fanart", "cosecha", "anime"),
-            formats = listOf("A4", "A6", "A5"),
-            addNewCategory = {}
+    when (val data = stockSceneData) {
+        is NewProduct -> NewProductView(
+            categoriesList = data.categories,
+            formats = data.formats,
+            saveNewCategory = { newCategory ->
+                stockViewModel.saveNewCategory(newCategory)
+            },
+            saveNewFormat = { newFormat ->
+                stockViewModel.saveNewFormat(newFormat)
+            }
         ) { product ->
             stockViewModel.saveProduct(product)
         }

@@ -34,7 +34,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -64,17 +63,23 @@ import java.io.File
 fun NewProductView(
     categoriesList: List<String>,
     formats: List<String>,
-    addNewCategory: () -> Unit,
+    saveNewCategory: (String) -> Unit,
+    saveNewFormat: (String) -> Unit,
     saveProduct: (Product) -> Unit,
 ) {
 
     var name by rememberSaveable { mutableStateOf("") }
     var image by rememberSaveable { mutableStateOf<Uri?>(null) }
-    var categories by rememberSaveable { mutableStateOf(mutableListOf<String>()) }
+    val categories by rememberSaveable { mutableStateOf(mutableListOf<String>()) }
     var format by rememberSaveable { mutableStateOf("") }
     var cost by rememberSaveable { mutableStateOf("") }
     var sellPrice by rememberSaveable { mutableStateOf("") }
     var offert by rememberSaveable { mutableStateOf("") }
+
+    var addCategoryVisible by remember { mutableStateOf(false) }
+    var newCategory by rememberSaveable { mutableStateOf("") }
+    var addFormatVisible by remember { mutableStateOf(false) }
+    var newFormat by rememberSaveable { mutableStateOf("") }
 
     val localContext = LocalContext.current
     val directory: File = localContext.createDirectoryFile()
@@ -122,7 +127,9 @@ fun NewProductView(
 
                 FlowRow {
                     for (cat in categoriesList) {
+
                         var selected by remember { mutableStateOf(false) }
+
                         FilterChip(
                             onClick = {
                                 if(selected){
@@ -134,18 +141,13 @@ fun NewProductView(
                                 }
                             },
                             selected = selected,
-                            leadingIcon = {
-                                if (selected) {
-
-                                    Icon(
-                                        imageVector = Icons.Filled.Done,
-                                        contentDescription = "Done icon",
-                                        modifier = Modifier.size(FilterChipDefaults.IconSize)
-                                    )
-                                }
-                            }
-
-                            ,
+                            selectedIcon = {
+                                Icon(
+                                    imageVector = Icons.Filled.Done,
+                                    contentDescription = "Done icon",
+                                    modifier = Modifier.size(FilterChipDefaults.IconSize)
+                                )
+                            },
                             ) {
                             Text(
                                 text = cat,
@@ -154,11 +156,40 @@ fun NewProductView(
                         }
                         Spacer(modifier = Modifier.padding(4.dp))
                     }
-                    Chip(onClick = { addNewCategory() }) {
+                    Chip(onClick = {
+                        addCategoryVisible = true
+                    }) {
                         Text(
                             text = stringResource(id = R.string.add_one_category),
                             style = MaterialTheme.typography.body1
                         )
+                    }
+                    if (addCategoryVisible){
+                        Row {
+                            TextField(
+                                modifier = Modifier.weight(0.5f),
+                                value = newCategory,
+                                onValueChange = { newCategory = it },
+                                placeholder = { },
+                                keyboardOptions = KeyboardOptions(
+                                    imeAction = ImeAction.Next
+                                ),
+                            )
+
+                            Spacer(modifier = Modifier.padding(4.dp))
+
+                            Button(
+                                onClick = {
+                                    saveNewCategory(newCategory)
+                                    addCategoryVisible = false
+                                    newCategory = ""
+                                }) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.baseline_check_24),
+                                    contentDescription = ""
+                                )
+                            }
+                        }
                     }
                 }
 
@@ -169,15 +200,64 @@ fun NewProductView(
                     style = MaterialTheme.typography.body1
                 )
 
-                TextField(
-                    modifier = Modifier.fillMaxWidth(),
-                    value = format,
-                    onValueChange = { format = it },
-                    placeholder = { Text(text = "A4") },
-                    keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Next
-                    ),
-                )
+                FlowRow {
+                    for (formatItem in formats) {
+                        FilterChip(
+                            onClick = {
+                                format = formatItem
+                            },
+                            selected = format == formatItem,
+                            selectedIcon = {
+                                Icon(
+                                    imageVector = Icons.Filled.Done,
+                                    contentDescription = "Done icon",
+                                    modifier = Modifier.size(FilterChipDefaults.IconSize)
+                                )
+                            },
+                        ) {
+                            Text(
+                                text = formatItem,
+                                style = MaterialTheme.typography.body1
+                            )
+                        }
+                        Spacer(modifier = Modifier.padding(4.dp))
+                    }
+                    Chip(onClick = {
+                        addFormatVisible = true
+                    }) {
+                        Text(
+                            text = stringResource(id = R.string.add_one_category),
+                            style = MaterialTheme.typography.body1
+                        )
+                    }
+                    if (addFormatVisible){
+                        Row {
+                            TextField(
+                                modifier = Modifier.weight(0.5f),
+                                value = newFormat,
+                                onValueChange = { newFormat = it },
+                                placeholder = { },
+                                keyboardOptions = KeyboardOptions(
+                                    imeAction = ImeAction.Next
+                                ),
+                            )
+
+                            Spacer(modifier = Modifier.padding(4.dp))
+
+                            Button(
+                                onClick = {
+                                    saveNewFormat(newFormat)
+                                    addFormatVisible = false
+                                    newFormat = ""
+                                }) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.baseline_check_24),
+                                    contentDescription = ""
+                                )
+                            }
+                        }
+                    }
+                }
 
                 Spacer(modifier = Modifier.padding(8.dp))
 
@@ -381,7 +461,8 @@ fun NewProductPreview() {
         NewProductView(
             categoriesList = listOf("fanart", "cosecha"),
             formats = listOf("A5", "A4", "A3", "Pegatinas"),
-            addNewCategory = {}
+            {},
+            {}
         ) {}
     }
 }
