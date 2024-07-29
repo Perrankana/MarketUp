@@ -8,15 +8,19 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -27,6 +31,7 @@ import androidx.compose.material.Chip
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FilterChip
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
@@ -43,18 +48,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import coil.compose.AsyncImage
 import com.perrankana.marketup.android.MyApplicationTheme
 import com.perrankana.marketup.android.R
 import com.perrankana.marketup.android.compose.BackgroundCard
+import com.perrankana.marketup.stock.ProductOffer
 import com.perrankana.marketup.stock.models.Product
 import java.io.File
 
@@ -74,12 +82,14 @@ fun NewProductView(
     var format by rememberSaveable { mutableStateOf("") }
     var cost by rememberSaveable { mutableStateOf("") }
     var sellPrice by rememberSaveable { mutableStateOf("") }
-    var offert by rememberSaveable { mutableStateOf("") }
+    var offers by rememberSaveable { mutableStateOf(listOf<ProductOffer>()) }
 
     var addCategoryVisible by remember { mutableStateOf(false) }
     var newCategory by rememberSaveable { mutableStateOf("") }
     var addFormatVisible by remember { mutableStateOf(false) }
     var newFormat by rememberSaveable { mutableStateOf("") }
+
+    var showOffersDialog by remember { mutableStateOf(false) }
 
     val localContext = LocalContext.current
     val directory: File = localContext.createDirectoryFile()
@@ -180,9 +190,11 @@ fun NewProductView(
 
                             Button(
                                 onClick = {
-                                    saveNewCategory(newCategory)
-                                    addCategoryVisible = false
-                                    newCategory = ""
+                                    if (newCategory.isNotEmpty()) {
+                                        saveNewCategory(newCategory)
+                                        addCategoryVisible = false
+                                        newCategory = ""
+                                    }
                                 }) {
                                 Icon(
                                     painter = painterResource(id = R.drawable.baseline_check_24),
@@ -246,9 +258,11 @@ fun NewProductView(
 
                             Button(
                                 onClick = {
-                                    saveNewFormat(newFormat)
-                                    addFormatVisible = false
-                                    newFormat = ""
+                                    if (newFormat.isNotEmpty()) {
+                                        saveNewFormat(newFormat)
+                                        addFormatVisible = false
+                                        newFormat = ""
+                                    }
                                 }) {
                                 Icon(
                                     painter = painterResource(id = R.drawable.baseline_check_24),
@@ -300,6 +314,7 @@ fun NewProductView(
                         keyboardType = KeyboardType.Number
                     ),
                 )
+
                 Spacer(modifier = Modifier.padding(8.dp))
 
                 Button(
@@ -308,13 +323,30 @@ fun NewProductView(
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = Color.LightGray
                     ),
-                    onClick = { }) {
+                    onClick = {
+                        showOffersDialog = true
+                    }
+                ) {
                     Text(
                         text = stringResource(id = R.string.offers)
                     )
                 }
 
-                Spacer(modifier = Modifier.padding(20.dp))
+                if (offers.isNotEmpty()) {
+
+                    Spacer(modifier = Modifier.padding(8.dp))
+
+                    OffersListView(
+                        offers = offers,
+                        removeOffer = { offer ->
+                            val tempOfferList = offers.toMutableList()
+                            tempOfferList.remove(offer)
+                            offers = tempOfferList
+                        }
+                    )
+                }
+
+                Spacer(modifier = Modifier.padding(40.dp))
             }
         }
         Card(
@@ -330,6 +362,26 @@ fun NewProductView(
                 onClick = { saveProduct(Product(name)) }) {
                 Text(text = stringResource(id = R.string.save_product))
             }
+        }
+
+        if (showOffersDialog) {
+            NewOfferView(
+                saveNxMOffer = { n, price ->
+                    val tempOfferList = offers.toMutableList()
+                    tempOfferList.add(ProductOffer.NxMOffer(n, price))
+                    offers = tempOfferList
+                    showOffersDialog = false
+                },
+                saveDiscountOffer = { discount ->
+                    val tempOfferList = offers.toMutableList()
+                    tempOfferList.add(ProductOffer.DiscountOffer(discount))
+                    offers = tempOfferList
+                    showOffersDialog = false
+                },
+                onClose = {
+                    showOffersDialog = false
+                }
+            )
         }
     }
 }
@@ -450,6 +502,227 @@ fun ImagePickerView(
                     contentDescription = ""
                 )
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class, ExperimentalLayoutApi::class)
+@Composable
+fun NewOfferView(
+    saveNxMOffer: (Int, Float) -> Unit,
+    saveDiscountOffer: (Int) -> Unit,
+    onClose: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight()
+            .background(color = colorResource(id = R.color.dark_overlay))
+    ) {
+        var nxmOfferSelected by remember { mutableStateOf(false) }
+        var discountOfferSelected by remember { mutableStateOf(false) }
+
+        var nxOffer by rememberSaveable { mutableStateOf("") }
+        var nxmOfferPrice by rememberSaveable { mutableStateOf("") }
+        var discountOffer by rememberSaveable { mutableStateOf("") }
+
+        Card(
+            modifier = Modifier
+                .align(Alignment.Center)
+        ) {
+            Icon(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(4.dp)
+                    .clickable {
+                        onClose()
+                    },
+                painter = painterResource(id = R.drawable.baseline_close_24),
+                contentDescription = ""
+            )
+            Column(
+                modifier = Modifier.padding(20.dp)
+            ) {
+                Text(text = stringResource(id = R.string.select_offer_type))
+
+                Spacer(modifier = Modifier.padding(8.dp))
+
+                FlowRow {
+                    FilterChip(
+                        selected = nxmOfferSelected,
+                        onClick = {
+                            nxmOfferSelected = !nxmOfferSelected
+                            discountOfferSelected = !nxmOfferSelected
+                        },
+                        selectedIcon = {
+                            Icon(
+                                imageVector = Icons.Filled.Done,
+                                contentDescription = "Done icon",
+                                modifier = Modifier.size(FilterChipDefaults.IconSize)
+                            )
+                        },
+                    ) {
+                        Text(text = stringResource(id = R.string.n_x_m_offer))
+                    }
+
+                    Spacer(modifier = Modifier.padding(4.dp))
+
+                    FilterChip(
+                        selected = discountOfferSelected,
+                        onClick = {
+                            discountOfferSelected = !discountOfferSelected
+                            nxmOfferSelected = !discountOfferSelected
+                        },
+                        selectedIcon = {
+                            Icon(
+                                imageVector = Icons.Filled.Done,
+                                contentDescription = "Done icon",
+                                modifier = Modifier.size(FilterChipDefaults.IconSize)
+                            )
+                        },
+                    ) {
+                        Text(text = stringResource(id = R.string.discount_offer))
+                    }
+                }
+
+                Spacer(modifier = Modifier.padding(8.dp))
+
+                if (nxmOfferSelected) {
+
+                    Row(
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    ) {
+                        TextField(
+                            modifier = Modifier.width(60.dp),
+                            value = nxOffer, onValueChange = {
+                                nxOffer = it
+                            }, keyboardOptions = KeyboardOptions(
+                                imeAction = ImeAction.Next,
+                                keyboardType = KeyboardType.Number
+                            ),
+                            placeholder = {
+                                Text(text = "N")
+                            })
+                        Text(
+                            modifier = Modifier
+                                .padding(4.dp)
+                                .align(Alignment.CenterVertically),
+                            text = "x", fontSize = 22.sp
+                        )
+                        TextField(
+                            modifier = Modifier.width(80.dp),
+                            value = nxmOfferPrice, onValueChange = {
+                                nxmOfferPrice = it
+                            }, keyboardOptions = KeyboardOptions(
+                                imeAction = ImeAction.Done,
+                                keyboardType = KeyboardType.Number
+                            )
+                        )
+                        Text(
+                            modifier = Modifier
+                                .padding(4.dp)
+                                .align(Alignment.CenterVertically),
+                            text = "€", fontSize = 22.sp
+                        )
+                    }
+                    Spacer(modifier = Modifier.padding(8.dp))
+                    Button(
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        onClick = {
+                            if (nxOffer.isNotEmpty() && nxmOfferPrice.isNotEmpty()) {
+                                saveNxMOffer(
+                                    nxOffer.toInt(),
+                                    nxmOfferPrice.toFloat()
+                                )
+                            }
+                        }) {
+                        Text(text = stringResource(id = R.string.save_this_offer))
+                    }
+                }
+
+                if (discountOfferSelected) {
+
+                    Row(
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    ) {
+                        TextField(
+                            modifier = Modifier.width(60.dp),
+                            value = discountOffer, onValueChange = {
+                                discountOffer = it
+                            }, keyboardOptions = KeyboardOptions(
+                                imeAction = ImeAction.Done,
+                                keyboardType = KeyboardType.Number
+                            )
+                        )
+                        Text(
+                            modifier = Modifier
+                                .padding(4.dp)
+                                .align(Alignment.CenterVertically),
+                            text = "%", fontSize = 22.sp
+                        )
+
+                    }
+                    Spacer(modifier = Modifier.padding(8.dp))
+                    Button(
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        onClick = {
+                            if (discountOffer.isNotEmpty()) {
+                                saveDiscountOffer(discountOffer.toInt())
+                            }
+                        }) {
+                        Text(text = stringResource(id = R.string.save_this_offer))
+                    }
+                }
+            }
+        }
+
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterialApi::class)
+@Composable
+fun OffersListView(
+    offers: List<ProductOffer>,
+    removeOffer: (ProductOffer) -> Unit
+) {
+    FlowRow {
+        for (offer in offers) {
+            when (offer) {
+                is ProductOffer.DiscountOffer -> {
+                    Chip(onClick = {
+                        removeOffer(offer)
+                    }) {
+                        Text(text = "${offer.discount} %")
+                        IconButton(
+                            modifier = Modifier.padding(2.dp),
+                            onClick = {
+                                removeOffer(offer)
+                            }) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.baseline_close_24),
+                                contentDescription = ""
+                            )
+                        }
+                    }
+                }
+
+                is ProductOffer.NxMOffer -> {
+                    Chip(onClick = {}) {
+                        Text(text = "${offer.n} x 1 = ${offer.price}€")
+                        IconButton(
+                            modifier = Modifier.padding(2.dp), onClick = {
+                                removeOffer(offer)
+                            }) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.baseline_close_24),
+                                contentDescription = ""
+                            )
+                        }
+                    }
+                }
+
+            }
+            Spacer(modifier = Modifier.padding(4.dp))
         }
     }
 }

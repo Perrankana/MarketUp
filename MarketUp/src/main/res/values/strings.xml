@@ -21,4 +21,8 @@
     <string name="price">Sell Price</string>
     <string name="offers">Offers</string>
     <string name="add_one_category">+ add one</string>
+    <string name="select_offer_type">Select offer type</string>
+    <string name="n_x_m_offer">N x M offer</string>
+    <string name="discount_offer">discount offer</string>
+    <string name="save_this_offer">Save this Offer</string>
 </resources>
