@@ -17,6 +17,7 @@
     <string name="name">Name</string>
     <string name="category">Categories</string>
     <string name="format">Format</string>
+    <string name="format_error">Need to select or add a format</string>
     <string name="cost">Cost</string>
     <string name="price">Sell Price</string>
     <string name="offers">Offers</string>

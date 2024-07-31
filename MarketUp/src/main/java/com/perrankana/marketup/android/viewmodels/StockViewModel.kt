@@ -1,5 +1,6 @@
 package com.perrankana.marketup.android.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -44,6 +45,7 @@ class StockViewModel @Inject constructor(
                     _stockSceneData.value = Empty
                 } else {
                     _stockSceneData.value = ShowStock(it)
+                    Log.d("BANANAS", "stock= $it")
                 }
             }, onFailure = {
                 _stockSceneData.value = Empty

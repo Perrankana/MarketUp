@@ -31,7 +31,6 @@ import androidx.compose.material.Chip
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FilterChip
 import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
@@ -62,7 +61,7 @@ import coil.compose.AsyncImage
 import com.perrankana.marketup.android.MyApplicationTheme
 import com.perrankana.marketup.android.R
 import com.perrankana.marketup.android.compose.BackgroundCard
-import com.perrankana.marketup.stock.ProductOffer
+import com.perrankana.marketup.stock.models.Offer
 import com.perrankana.marketup.stock.models.Product
 import java.io.File
 
@@ -77,12 +76,16 @@ fun NewProductView(
 ) {
 
     var name by rememberSaveable { mutableStateOf("") }
+    var nameError by rememberSaveable { mutableStateOf(false) }
     var image by rememberSaveable { mutableStateOf<Uri?>(null) }
     val categories by rememberSaveable { mutableStateOf(mutableListOf<String>()) }
     var format by rememberSaveable { mutableStateOf("") }
+    var formatError by rememberSaveable { mutableStateOf(false) }
     var cost by rememberSaveable { mutableStateOf("") }
+    var costError by rememberSaveable { mutableStateOf(false) }
     var sellPrice by rememberSaveable { mutableStateOf("") }
-    var offers by rememberSaveable { mutableStateOf(listOf<ProductOffer>()) }
+    var priceError by rememberSaveable { mutableStateOf(false) }
+    var offers by rememberSaveable { mutableStateOf(listOf<Offer>()) }
 
     var addCategoryVisible by remember { mutableStateOf(false) }
     var newCategory by rememberSaveable { mutableStateOf("") }
@@ -121,11 +124,15 @@ fun NewProductView(
                 TextField(
                     modifier = Modifier.fillMaxWidth(),
                     value = name,
-                    onValueChange = { name = it },
+                    onValueChange = {
+                        nameError = false
+                        name = it
+                    },
                     placeholder = { Text(text = "Print") },
                     keyboardOptions = KeyboardOptions(
                         imeAction = ImeAction.Next
                     ),
+                    isError = nameError
                 )
 
                 Spacer(modifier = Modifier.padding(8.dp))
@@ -212,11 +219,19 @@ fun NewProductView(
                     style = MaterialTheme.typography.body1
                 )
 
+                if (formatError) {
+                    Text(
+                        text = stringResource(id = R.string.format_error),
+                        style = MaterialTheme.typography.body1,
+                        color = Color.Red
+                    )
+                }
                 FlowRow {
                     for (formatItem in formats) {
                         FilterChip(
                             onClick = {
                                 format = formatItem
+                                formatError = false
                             },
                             selected = format == formatItem,
                             selectedIcon = {
@@ -291,11 +306,13 @@ fun NewProductView(
                                 cost = value
                             }
                         }
+                        costError = false
                     },
                     keyboardOptions = KeyboardOptions(
                         imeAction = ImeAction.Next,
                         keyboardType = KeyboardType.Number
                     ),
+                    isError = costError
                 )
 
                 Spacer(modifier = Modifier.padding(8.dp))
@@ -308,11 +325,15 @@ fun NewProductView(
                 TextField(
                     modifier = Modifier.fillMaxWidth(),
                     value = sellPrice,
-                    onValueChange = { sellPrice = it },
+                    onValueChange = {
+                        sellPrice = it
+                        priceError = false
+                    },
                     keyboardOptions = KeyboardOptions(
                         imeAction = ImeAction.Done,
                         keyboardType = KeyboardType.Number
                     ),
+                    isError = priceError
                 )
 
                 Spacer(modifier = Modifier.padding(8.dp))
@@ -359,7 +380,38 @@ fun NewProductView(
                     .fillMaxWidth()
                     .align(Alignment.BottomCenter)
                     .padding(20.dp),
-                onClick = { saveProduct(Product(name)) }) {
+                onClick = {
+                    if (name.isEmpty()) {
+                        nameError = true
+                    }
+                    if (format.isEmpty()) {
+                        formatError = true
+                    }
+                    if (cost.isEmpty()) {
+                        costError = true
+                    }
+                    if (sellPrice.isEmpty()) {
+                        priceError = true
+                    }
+                    if (
+                        name.isNotEmpty() &&
+                        format.isNotEmpty() &&
+                        cost.isNotEmpty() &&
+                        sellPrice.isNotEmpty()
+                    ) {
+                        saveProduct(
+                            Product(
+                                name = name,
+                                image = image?.toString(),
+                                categories = categories,
+                                format = format,
+                                cost = cost.toFloat(),
+                                price = sellPrice.toFloat(),
+                                offers = offers
+                            )
+                        )
+                    }
+                }) {
                 Text(text = stringResource(id = R.string.save_product))
             }
         }
@@ -368,13 +420,13 @@ fun NewProductView(
             NewOfferView(
                 saveNxMOffer = { n, price ->
                     val tempOfferList = offers.toMutableList()
-                    tempOfferList.add(ProductOffer.NxMOffer(n, price))
+                    tempOfferList.add(Offer.NxMOffer(n, price))
                     offers = tempOfferList
                     showOffersDialog = false
                 },
                 saveDiscountOffer = { discount ->
                     val tempOfferList = offers.toMutableList()
-                    tempOfferList.add(ProductOffer.DiscountOffer(discount))
+                    tempOfferList.add(Offer.DiscountOffer(discount))
                     offers = tempOfferList
                     showOffersDialog = false
                 },
@@ -682,19 +734,20 @@ fun NewOfferView(
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterialApi::class)
 @Composable
 fun OffersListView(
-    offers: List<ProductOffer>,
-    removeOffer: (ProductOffer) -> Unit
+    offers: List<Offer>,
+    removeOffer: (Offer) -> Unit
 ) {
     FlowRow {
         for (offer in offers) {
             when (offer) {
-                is ProductOffer.DiscountOffer -> {
+                is Offer.DiscountOffer -> {
                     Chip(onClick = {
                         removeOffer(offer)
                     }) {
                         Text(text = "${offer.discount} %")
                         Icon(
-                            modifier = Modifier.padding(2.dp)
+                            modifier = Modifier
+                                .padding(2.dp)
                                 .clickable { removeOffer(offer) },
                             painter = painterResource(id = R.drawable.baseline_close_24),
                             contentDescription = ""
@@ -702,11 +755,12 @@ fun OffersListView(
                     }
                 }
 
-                is ProductOffer.NxMOffer -> {
+                is Offer.NxMOffer -> {
                     Chip(onClick = {}) {
                         Text(text = "${offer.n} x 1 = ${offer.price}€")
                         Icon(
-                            modifier = Modifier.padding(2.dp)
+                            modifier = Modifier
+                                .padding(2.dp)
                                 .clickable { removeOffer(offer) },
                             painter = painterResource(id = R.drawable.baseline_close_24),
                             contentDescription = ""
