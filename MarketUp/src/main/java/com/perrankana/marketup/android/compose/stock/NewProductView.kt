@@ -693,31 +693,24 @@ fun OffersListView(
                         removeOffer(offer)
                     }) {
                         Text(text = "${offer.discount} %")
-                        IconButton(
-                            modifier = Modifier.padding(2.dp),
-                            onClick = {
-                                removeOffer(offer)
-                            }) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.baseline_close_24),
-                                contentDescription = ""
-                            )
-                        }
+                        Icon(
+                            modifier = Modifier.padding(2.dp)
+                                .clickable { removeOffer(offer) },
+                            painter = painterResource(id = R.drawable.baseline_close_24),
+                            contentDescription = ""
+                        )
                     }
                 }
 
                 is ProductOffer.NxMOffer -> {
                     Chip(onClick = {}) {
                         Text(text = "${offer.n} x 1 = ${offer.price}€")
-                        IconButton(
-                            modifier = Modifier.padding(2.dp), onClick = {
-                                removeOffer(offer)
-                            }) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.baseline_close_24),
-                                contentDescription = ""
-                            )
-                        }
+                        Icon(
+                            modifier = Modifier.padding(2.dp)
+                                .clickable { removeOffer(offer) },
+                            painter = painterResource(id = R.drawable.baseline_close_24),
+                            contentDescription = ""
+                        )
                     }
                 }
 
