@@ -49,12 +49,9 @@ fun StockScene() {
 
 @Composable
 fun StockView() {
-    BackgroundCard {
-        Text(
-            modifier = Modifier.padding(20.dp),
-            text = "Stock"
-        )
-    }
+    StockListView(
+        onSearch = {}
+    )
 }
 
 @Composable
