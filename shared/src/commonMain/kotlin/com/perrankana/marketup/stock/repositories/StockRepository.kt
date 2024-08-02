@@ -23,7 +23,7 @@ object StockRepositoryImpl: StockRepository {
 
 val testProduct = Product(
     name="Akane y Ranma",
-    image="content://media/picker/0/com.google.android.apps.photos.cloudpicker/media/49c52711-9ff4-4417-a1e3-c3966ee161a4-1_all_15564",
+    image = "content://com.perrankana.marketup.android.fileprovider/temp_images/image_17225983151295947473856042023082.jpg",
     categories= listOf("anime", "fanart"),
     format="A5",
     cost=0.3f,

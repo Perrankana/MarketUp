@@ -2,4 +2,5 @@
 <resources>
     <color name="icon_color">#F4F4F4</color>
     <color name="dark_overlay">#D4000000</color>
+    <color name="cost_color">#D4FF8D8D</color>
 </resources>

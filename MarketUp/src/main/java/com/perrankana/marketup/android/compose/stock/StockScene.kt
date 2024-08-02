@@ -20,6 +20,7 @@ import com.perrankana.marketup.android.compose.BackgroundCard
 import com.perrankana.marketup.android.viewmodels.StockViewModel
 import com.perrankana.marketup.stock.NewProduct
 import com.perrankana.marketup.stock.ShowStock
+import com.perrankana.marketup.stock.models.Product
 
 @Composable
 fun StockScene() {
@@ -40,7 +41,10 @@ fun StockScene() {
         ) { product ->
             stockViewModel.saveProduct(product)
         }
-        is ShowStock -> StockView()
+        is ShowStock -> StockView(
+            products = data.stock,
+            onNewProduct = { stockViewModel.onNewProduct() }
+        )
         else -> EmptyStockView {
             stockViewModel.onNewProduct()
         }
@@ -48,8 +52,13 @@ fun StockScene() {
 }
 
 @Composable
-fun StockView() {
+fun StockView(
+    products: List<Product>,
+    onNewProduct: () -> Unit
+) {
     StockListView(
+        products = products,
+        onNewProduct = onNewProduct,
         onSearch = {}
     )
 }

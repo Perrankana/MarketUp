@@ -5,8 +5,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.perrankana.marketup.dashboard.DashboardData
 import com.perrankana.marketup.stock.Empty
 import com.perrankana.marketup.stock.NewProduct
 import com.perrankana.marketup.stock.ShowStock
@@ -71,6 +69,7 @@ class StockViewModel @Inject constructor(
         viewModelScope.launch {
             saveProductUseCase(product)
         }
+        getStockData()
     }
 
     fun saveNewCategory(newCategory: String) {
