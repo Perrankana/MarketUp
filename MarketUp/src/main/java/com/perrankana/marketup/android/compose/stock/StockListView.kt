@@ -196,6 +196,34 @@ fun ProductItem(product: Product) {
                     )
                 }
 
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .padding(8.dp)
+                        .background(
+                            color = if (product.stock == 0) {
+                                MaterialTheme.colors.error}
+                            else {
+                                MaterialTheme.colors.secondary
+                            },
+                            shape = MaterialTheme.shapes.medium
+                        ),
+                    horizontalAlignment = Alignment.End
+                ) {
+                    Text(
+                        modifier = Modifier
+                            .padding(start = 8.dp, end = 8.dp),
+                        text = product.stock.toString(),
+                        style = MaterialTheme.typography.h5,
+                        textAlign = TextAlign.End,
+                        color = if (product.stock == 0) {
+                            MaterialTheme.colors.onError}
+                        else {
+                            MaterialTheme.colors.onSecondary
+                        }
+                    )
+                }
+
             }
             Column(
                 modifier = Modifier

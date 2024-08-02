@@ -86,6 +86,8 @@ fun NewProductView(
     var sellPrice by rememberSaveable { mutableStateOf("") }
     var priceError by rememberSaveable { mutableStateOf(false) }
     var offers by rememberSaveable { mutableStateOf(listOf<Offer>()) }
+    var stock by rememberSaveable { mutableStateOf("") }
+    var stockError by rememberSaveable { mutableStateOf(false) }
 
     var addCategoryVisible by remember { mutableStateOf(false) }
     var newCategory by rememberSaveable { mutableStateOf("") }
@@ -330,10 +332,31 @@ fun NewProductView(
                         priceError = false
                     },
                     keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Done,
+                        imeAction = ImeAction.Next,
                         keyboardType = KeyboardType.Number
                     ),
                     isError = priceError
+                )
+
+                Spacer(modifier = Modifier.padding(8.dp))
+
+                Text(
+                    text = stringResource(id = R.string.stock),
+                    style = MaterialTheme.typography.body1
+                )
+
+                TextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = stock,
+                    onValueChange = {
+                        stock = it
+                        stockError = false
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Done,
+                        keyboardType = KeyboardType.Number
+                    ),
+                    isError = stockError
                 )
 
                 Spacer(modifier = Modifier.padding(8.dp))
@@ -393,11 +416,15 @@ fun NewProductView(
                     if (sellPrice.isEmpty()) {
                         priceError = true
                     }
+                    if (stock.isEmpty()) {
+                        stockError = true
+                    }
                     if (
                         name.isNotEmpty() &&
                         format.isNotEmpty() &&
                         cost.isNotEmpty() &&
-                        sellPrice.isNotEmpty()
+                        sellPrice.isNotEmpty() &&
+                        stock.isNotEmpty()
                     ) {
                         saveProduct(
                             Product(
@@ -407,7 +434,8 @@ fun NewProductView(
                                 format = format,
                                 cost = cost.toFloat(),
                                 price = sellPrice.toFloat(),
-                                offers = offers
+                                offers = offers,
+                                stock = stock.toInt()
                             )
                         )
                     }

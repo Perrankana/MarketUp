@@ -7,7 +7,8 @@ data class Product(
     val format: String,
     val cost: Float,
     val price: Float,
-    val offers: List<Offer>
+    val offers: List<Offer>,
+    val stock: Int
 )
 
 sealed class Offer {

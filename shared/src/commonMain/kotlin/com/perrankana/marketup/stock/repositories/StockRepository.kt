@@ -28,5 +28,6 @@ val testProduct = Product(
     format="A5",
     cost=0.3f,
     price=5.0f,
-    offers= listOf(Offer.NxMOffer(n = 2, price = 8.0f))
+    offers= listOf(Offer.NxMOffer(n = 2, price = 8.0f)),
+    stock = 3
 )
