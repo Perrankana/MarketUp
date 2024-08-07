@@ -1,17 +1,22 @@
 package com.perrankana.marketup.stock.repositories
 
+import com.perrankana.marketup.database.FormatDao
+import com.perrankana.marketup.database.FormatEntity
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+
 interface FormatRepository {
-    fun getFormats(): List<String>
-    fun saveFormat(format: String) : List<String>
+    suspend fun getFormats(): Flow<List<String>>
+    suspend fun saveFormat(format: String)
 }
 
-object FormatRepositoryImpl: FormatRepository{
-    private val formats = mutableListOf("A4", "A5", "A6")
+class FormatRepositoryImpl(private val formatDao: FormatDao): FormatRepository{
 
-    override fun getFormats(): List<String> = formats
+    override suspend fun getFormats(): Flow<List<String>> = formatDao.getAllAsFlow().map {
+        it.map { it.name }
+    }
 
-    override fun saveFormat(format: String): List<String> {
-        formats.add(format)
-        return formats
+    override suspend fun saveFormat(format: String) {
+        formatDao.insert(FormatEntity(name = format))
     }
 }

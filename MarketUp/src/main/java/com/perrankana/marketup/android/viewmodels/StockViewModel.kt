@@ -39,11 +39,13 @@ class StockViewModel @Inject constructor(
     private fun getStockData() {
         viewModelScope.launch {
             getStockUseCase().fold(onSuccess = {
-                if (it.isEmpty()){
-                    _stockSceneData.value = Empty
-                } else {
-                    _stockSceneData.value = ShowStock(it)
-                    Log.d("BANANAS", "stock= $it")
+                it.collect {
+                    if (it.isEmpty()) {
+                        _stockSceneData.value = Empty
+                    } else {
+                        _stockSceneData.value = ShowStock(it)
+                        Log.d("BANANAS", "stock= $it")
+                    }
                 }
             }, onFailure = {
                 _stockSceneData.value = Empty
@@ -54,11 +56,13 @@ class StockViewModel @Inject constructor(
     fun onNewProduct() {
         viewModelScope.launch {
             getNewProductDataUseCase().fold(
-                onSuccess = {
-                    _stockSceneData.value = NewProduct(
-                        categories = it.first,
-                        formats = it.second
-                    )
+                onSuccess = { result ->
+                    result.collect {
+                        _stockSceneData.value = NewProduct(
+                            categories = it.first,
+                            formats = it.second
+                        )
+                    }
                 },
                 onFailure = {}
             )
@@ -67,7 +71,14 @@ class StockViewModel @Inject constructor(
 
     fun saveProduct(product: Product) {
         viewModelScope.launch {
-            saveProductUseCase(product)
+            saveProductUseCase(product).fold(
+                onSuccess = {
+
+                },
+                onFailure = {
+                    Log.e("BANANAS", "[saveProduct] Failed = ${it.message}")
+                }
+            )
         }
         getStockData()
     }
@@ -75,8 +86,10 @@ class StockViewModel @Inject constructor(
     fun saveNewCategory(newCategory: String) {
         viewModelScope.launch {
             saveNewCategoryUseCase(newCategory).fold(
-                onSuccess = {
-                    _stockSceneData.value = (_stockSceneData.value as NewProduct).copy(categories = it)
+                onSuccess = { result ->
+                    result.collect{
+                        _stockSceneData.value = (_stockSceneData.value as NewProduct).copy(categories = it)
+                    }
                 },
                 onFailure = {}
             )
@@ -86,8 +99,11 @@ class StockViewModel @Inject constructor(
     fun saveNewFormat(newFormat: String) {
         viewModelScope.launch {
             saveNewFormatUseCase(newFormat).fold(
-                onSuccess = {
-                    _stockSceneData.value = (_stockSceneData.value as NewProduct).copy(formats = it)
+                onSuccess = {result ->
+                    result.collect {
+                        _stockSceneData.value =
+                            (_stockSceneData.value as NewProduct).copy(formats = it)
+                    }
                 },
                 onFailure = {}
             )

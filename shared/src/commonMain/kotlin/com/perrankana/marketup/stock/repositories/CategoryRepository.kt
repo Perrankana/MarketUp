@@ -1,16 +1,21 @@
 package com.perrankana.marketup.stock.repositories
 
+import com.perrankana.marketup.database.CategoryDao
+import com.perrankana.marketup.database.CategoryEntity
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+
 interface CategoryRepository {
-    fun saveCategory(category: String) : List<String>
-    fun getCategories(): List<String>
+    suspend fun saveCategory(category: String)
+    suspend fun getCategories(): Flow<List<String>>
 }
 
-object CategoryRepositoryImpl: CategoryRepository{
-    private val categories = mutableListOf<String>("anime", "cosecha")
-    override fun saveCategory(category: String): List<String> {
-        categories.add(category)
-        return categories
+class CategoryRepositoryImpl(private val categoryDao: CategoryDao): CategoryRepository{
+    override suspend fun saveCategory(category: String) {
+        categoryDao.insert(CategoryEntity(name = category))
     }
 
-    override fun getCategories(): List<String> = categories
+    override suspend fun getCategories(): Flow<List<String>> = categoryDao.getAllAsFlow().map {
+        it.map { it.name }
+    }
 }

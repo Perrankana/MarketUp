@@ -1,5 +1,13 @@
 package com.perrankana.marketup.android.di
 
+import android.content.Context
+import com.perrankana.marketup.database.AppDatabase
+import com.perrankana.marketup.database.CategoryDao
+import com.perrankana.marketup.database.FormatDao
+import com.perrankana.marketup.database.ProductDao
+import com.perrankana.marketup.database.getDatabaseBuilder
+import com.perrankana.marketup.stock.datasource.StockDataSource
+import com.perrankana.marketup.stock.datasource.getStockDataSource
 import com.perrankana.marketup.stock.repositories.CategoryRepository
 import com.perrankana.marketup.stock.repositories.CategoryRepositoryImpl
 import com.perrankana.marketup.stock.repositories.FormatRepository
@@ -19,8 +27,10 @@ import com.perrankana.marketup.stock.usecases.SaveProductUseCaseImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import java.text.Normalizer.Form
+import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
 @Module
@@ -52,11 +62,25 @@ class StockModule {
     }
 
     @Provides
-    fun provideStockRepository(): StockRepository = StockRepositoryImpl
+    fun provideStockRepository(productDao: ProductDao): StockRepository = StockRepositoryImpl(productDao)
 
     @Provides
-    fun provideCategoryRepository(): CategoryRepository = CategoryRepositoryImpl
+    fun provideProductDao(stockDataSource: StockDataSource): ProductDao = stockDataSource.getProductDao()
 
     @Provides
-    fun provideFormatRepository(): FormatRepository = FormatRepositoryImpl
+    fun provideCategoryDao(stockDataSource: StockDataSource): CategoryDao = stockDataSource.getCategoryDao()
+
+    @Provides
+    fun provideFormatDao(stockDataSource: StockDataSource): FormatDao = stockDataSource.getFormatDao()
+
+
+    @Singleton
+    @Provides
+    fun provideStockDataSource(@ApplicationContext context: Context): StockDataSource = getStockDataSource(context)
+
+    @Provides
+    fun provideCategoryRepository(categoryDao: CategoryDao): CategoryRepository = CategoryRepositoryImpl(categoryDao)
+
+    @Provides
+    fun provideFormatRepository(formatDao: FormatDao): FormatRepository = FormatRepositoryImpl(formatDao)
 }

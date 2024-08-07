@@ -1,7 +1,7 @@
 plugins {
     kotlin("multiplatform")
+    kotlin("plugin.serialization") version "2.0.0"
     id("com.android.library")
-    id("org.jetbrains.kotlin.plugin.serialization").version("2.0.0")
     id("com.google.devtools.ksp").version("2.0.0-1.0.21")
     id("androidx.room").version("2.6.1")
 }
@@ -35,6 +35,8 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
                 implementation("androidx.room:room-runtime:2.7.0-alpha01" )
                 implementation("androidx.sqlite:sqlite-bundled:2.5.0-SNAPSHOT")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
+//                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:2.0.0")
 //                implementation("org.jetbrains.kotlinx:atomicfu:0.23.1")
             }
         }
