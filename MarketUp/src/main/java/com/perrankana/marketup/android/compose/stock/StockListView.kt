@@ -1,6 +1,7 @@
 package com.perrankana.marketup.android.compose.stock
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -55,7 +56,8 @@ import com.perrankana.marketup.stock.repositories.testProduct
 fun StockListView(
     products: List<Product>,
     onNewProduct: () -> Unit,
-    onSearch: (String) -> Unit
+    onSearch: (String) -> Unit,
+    onProductClick: (Product) -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -73,7 +75,9 @@ fun StockListView(
         Background(modifier = Modifier.padding(contentPadding)) {
             LazyColumn {
                 items(products) { product ->
-                    ProductItem(product = product)
+                    ProductItem(product = product) { product ->
+                        onProductClick(product)
+                    }
                     Spacer(modifier = Modifier.padding(2.dp))
                 }
             }
@@ -152,9 +156,12 @@ fun StockHeaderView(
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalLayoutApi::class)
 @Composable
-fun ProductItem(product: Product) {
+fun ProductItem(product: Product, onProductClick: (Product) -> Unit) {
     Card(
         modifier = Modifier.padding(end = 20.dp, start = 20.dp)
+            .clickable {
+                onProductClick(product)
+            }
     ) {
         Row {
             Box(
@@ -291,7 +298,8 @@ fun StockListViewPreview() {
         StockListView(
             products = listOf(testProduct),
             onNewProduct = {},
-            onSearch = {}
+            onSearch = {},
+            onProductClick = {}
         )
     }
 }

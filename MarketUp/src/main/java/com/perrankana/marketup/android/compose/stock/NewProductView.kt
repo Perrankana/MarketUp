@@ -57,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import coil.compose.AsyncImage
 import com.perrankana.marketup.android.MyApplicationTheme
 import com.perrankana.marketup.android.R
@@ -68,25 +69,27 @@ import java.io.File
 @OptIn(ExperimentalMaterialApi::class, ExperimentalLayoutApi::class)
 @Composable
 fun NewProductView(
+    product: Product? = null,
     categoriesList: List<String>,
     formats: List<String>,
     saveNewCategory: (String) -> Unit,
     saveNewFormat: (String) -> Unit,
     saveProduct: (Product) -> Unit,
+    deleteProduct: (Product) -> Unit = {}
 ) {
 
-    var name by rememberSaveable { mutableStateOf("") }
+    var name by rememberSaveable { mutableStateOf(product?.name.orEmpty()) }
     var nameError by rememberSaveable { mutableStateOf(false) }
-    var image by rememberSaveable { mutableStateOf<Uri?>(null) }
-    val categories by rememberSaveable { mutableStateOf(mutableListOf<String>()) }
-    var format by rememberSaveable { mutableStateOf("") }
+    var image by rememberSaveable { mutableStateOf<Uri?>(product?.image?.toUri()) }
+    var categories by rememberSaveable { mutableStateOf(product?.categories ?: emptyList()) }
+    var format by rememberSaveable { mutableStateOf(product?.format.orEmpty()) }
     var formatError by rememberSaveable { mutableStateOf(false) }
-    var cost by rememberSaveable { mutableStateOf("") }
+    var cost by rememberSaveable { mutableStateOf(product?.cost?.toString().orEmpty()) }
     var costError by rememberSaveable { mutableStateOf(false) }
-    var sellPrice by rememberSaveable { mutableStateOf("") }
+    var sellPrice by rememberSaveable { mutableStateOf(product?.price?.toString().orEmpty()) }
     var priceError by rememberSaveable { mutableStateOf(false) }
-    var offers by rememberSaveable { mutableStateOf(listOf<Offer>()) }
-    var stock by rememberSaveable { mutableStateOf("") }
+    var offers by rememberSaveable { mutableStateOf(product?.offers ?: emptyList()) }
+    var stock by rememberSaveable { mutableStateOf(product?.stock?.toString().orEmpty()) }
     var stockError by rememberSaveable { mutableStateOf(false) }
 
     var addCategoryVisible by remember { mutableStateOf(false) }
@@ -153,10 +156,14 @@ fun NewProductView(
                             onClick = {
                                 if(selected){
                                     selected = false
-                                    categories.remove(cat)
+                                    val tempCategories = categories.toMutableList()
+                                    tempCategories.remove(cat)
+                                    categories = tempCategories
                                 } else {
                                     selected = true
-                                    categories.add(cat)
+                                    val tempCategories = categories.toMutableList()
+                                    tempCategories.add(cat)
+                                    categories = tempCategories
                                 }
                             },
                             selected = selected,
@@ -398,49 +405,64 @@ fun NewProductView(
                 .fillMaxWidth()
                 .align(Alignment.BottomCenter)
         ) {
-            Button(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.BottomCenter)
-                    .padding(20.dp),
-                onClick = {
-                    if (name.isEmpty()) {
-                        nameError = true
-                    }
-                    if (format.isEmpty()) {
-                        formatError = true
-                    }
-                    if (cost.isEmpty()) {
-                        costError = true
-                    }
-                    if (sellPrice.isEmpty()) {
-                        priceError = true
-                    }
-                    if (stock.isEmpty()) {
-                        stockError = true
-                    }
-                    if (
-                        name.isNotEmpty() &&
-                        format.isNotEmpty() &&
-                        cost.isNotEmpty() &&
-                        sellPrice.isNotEmpty() &&
-                        stock.isNotEmpty()
-                    ) {
-                        saveProduct(
-                            Product(
-                                name = name,
-                                image = image?.toString(),
-                                categories = categories,
-                                format = format,
-                                cost = cost.toFloat(),
-                                price = sellPrice.toFloat(),
-                                offers = offers,
-                                stock = stock.toInt()
+                    .padding(20.dp)
+            ) {
+                Button(
+                    modifier = Modifier.weight(1f),
+                    onClick = {
+                        if (name.isEmpty()) {
+                            nameError = true
+                        }
+                        if (format.isEmpty()) {
+                            formatError = true
+                        }
+                        if (cost.isEmpty()) {
+                            costError = true
+                        }
+                        if (sellPrice.isEmpty()) {
+                            priceError = true
+                        }
+                        if (stock.isEmpty()) {
+                            stockError = true
+                        }
+                        if (
+                            name.isNotEmpty() &&
+                            format.isNotEmpty() &&
+                            cost.isNotEmpty() &&
+                            sellPrice.isNotEmpty() &&
+                            stock.isNotEmpty()
+                        ) {
+                            saveProduct(
+                                Product(
+                                    id = product?.id ?: 0L,
+                                    name = name,
+                                    image = image?.toString(),
+                                    categories = categories,
+                                    format = format,
+                                    cost = cost.toFloat(),
+                                    price = sellPrice.toFloat(),
+                                    offers = offers,
+                                    stock = stock.toInt()
+                                )
                             )
-                        )
+                        }
+                    }) {
+                    Text(text = stringResource(id = R.string.save))
+                }
+                if(product != null){
+                    Spacer(modifier = Modifier.padding(4.dp))
+                    Button(
+                        modifier = Modifier,
+                        onClick = {
+                            deleteProduct(product)
+                        }) {
+                        Text(text = stringResource(id = R.string.delete))
                     }
-                }) {
-                Text(text = stringResource(id = R.string.save_product))
+                }
             }
         }
 
@@ -807,10 +829,12 @@ fun OffersListView(
 fun NewProductPreview() {
     MyApplicationTheme {
         NewProductView(
+            product = com.perrankana.marketup.stock.repositories.testProduct,
             categoriesList = listOf("fanart", "cosecha"),
             formats = listOf("A5", "A4", "A3", "Pegatinas"),
-            {},
-            {}
+            saveNewCategory = {},
+            saveNewFormat = {},
+            saveProduct = {}
         ) {}
     }
 }

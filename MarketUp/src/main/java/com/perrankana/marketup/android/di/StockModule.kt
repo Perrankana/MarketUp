@@ -14,6 +14,8 @@ import com.perrankana.marketup.stock.repositories.FormatRepository
 import com.perrankana.marketup.stock.repositories.FormatRepositoryImpl
 import com.perrankana.marketup.stock.repositories.StockRepository
 import com.perrankana.marketup.stock.repositories.StockRepositoryImpl
+import com.perrankana.marketup.stock.usecases.DeleteProductUseCase
+import com.perrankana.marketup.stock.usecases.DeleteProductUseCaseImpl
 import com.perrankana.marketup.stock.usecases.GetNewProductDataUseCase
 import com.perrankana.marketup.stock.usecases.GetNewProductDataUseCaseImpl
 import com.perrankana.marketup.stock.usecases.GetStockUseCase
@@ -59,6 +61,11 @@ class StockModule {
     @Provides
     fun provideGetNewProductDataUseCase(categoryRepository: CategoryRepository, formatRepository: FormatRepository): GetNewProductDataUseCase {
         return GetNewProductDataUseCaseImpl(categoryRepository, formatRepository)
+    }
+
+    @Provides
+    fun provideDeleteProductUseCase(repository: StockRepository): DeleteProductUseCase {
+        return DeleteProductUseCaseImpl(repository)
     }
 
     @Provides

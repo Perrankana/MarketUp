@@ -14,11 +14,11 @@ interface StockRepository {
     suspend fun getStock(): Flow<List<Product>>
 
     suspend fun saveProduct(product: Product)
+
+    suspend fun deleteProduct(product: Product)
 }
 
 class StockRepositoryImpl(private val productDao: ProductDao): StockRepository {
-
-    private var stock: MutableList<Product> = mutableListOf( testProduct, testProduct, testProduct )
 
     override suspend fun getStock(): Flow<List<Product>> = productDao.getAllAsFlow().map {
         it.map { entity ->
@@ -27,7 +27,15 @@ class StockRepositoryImpl(private val productDao: ProductDao): StockRepository {
     }
 
     override suspend fun saveProduct(product: Product) {
-        productDao.insert(product.toNewEntity())
+        if (product.id != 0L) {
+            productDao.update(product.toEntity())
+        } else {
+            productDao.insert(product.toNewEntity())
+        }
+    }
+
+    override suspend fun deleteProduct(product: Product) {
+        productDao.delete(product.toEntity())
     }
 }
 
@@ -43,6 +51,18 @@ val testProduct = Product(
 )
 
 fun Product.toNewEntity(): ProductEntity = ProductEntity(
+    name = name,
+    image = image,
+    categories = Json.encodeToString(serializersModule.serializer(),categories),
+    format = format,
+    cost = cost,
+    price = price,
+    offers = Json.encodeToString(serializersModule.serializer(),offers),
+    stock = stock
+)
+
+fun Product.toEntity(): ProductEntity = ProductEntity(
+    id = id ?: 0L,
     name = name,
     image = image,
     categories = Json.encodeToString(serializersModule.serializer(),categories),

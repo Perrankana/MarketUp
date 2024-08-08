@@ -5,11 +5,13 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.perrankana.marketup.stock.EditProduct
 import com.perrankana.marketup.stock.Empty
 import com.perrankana.marketup.stock.NewProduct
 import com.perrankana.marketup.stock.ShowStock
 import com.perrankana.marketup.stock.StockSceneData
 import com.perrankana.marketup.stock.models.Product
+import com.perrankana.marketup.stock.usecases.DeleteProductUseCase
 import com.perrankana.marketup.stock.usecases.GetNewProductDataUseCase
 import com.perrankana.marketup.stock.usecases.GetStockUseCase
 import com.perrankana.marketup.stock.usecases.SaveNewCategoryUseCase
@@ -25,7 +27,8 @@ class StockViewModel @Inject constructor(
     private val saveProductUseCase: SaveProductUseCase,
     private val saveNewCategoryUseCase: SaveNewCategoryUseCase,
     private val saveNewFormatUseCase: SaveNewFormatUseCase,
-    private val getNewProductDataUseCase: GetNewProductDataUseCase
+    private val getNewProductDataUseCase: GetNewProductDataUseCase,
+    private val deleteProductUseCase: DeleteProductUseCase
 ) : ViewModel() {
 
     private val _stockSceneData: MutableLiveData<StockSceneData> = MutableLiveData(Empty)
@@ -108,5 +111,36 @@ class StockViewModel @Inject constructor(
                 onFailure = {}
             )
         }
+    }
+
+    fun onProductSelected(product: Product) {
+        viewModelScope.launch {
+            getNewProductDataUseCase().fold(
+                onSuccess = { result ->
+                    result.collect {
+                        _stockSceneData.value = EditProduct(
+                            product = product,
+                            categories = it.first,
+                            formats = it.second
+                        )
+                    }
+                },
+                onFailure = {}
+            )
+        }
+    }
+
+    fun deleteProduct(product: Product) {
+        viewModelScope.launch {
+            deleteProductUseCase(product).fold(
+                onSuccess = {
+
+                },
+                onFailure = {
+                    Log.e("BANANAS", "[deleteProduct] Failed = ${it.message}")
+                }
+            )
+        }
+        getStockData()
     }
 }

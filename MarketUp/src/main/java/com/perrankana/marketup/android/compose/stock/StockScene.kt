@@ -18,6 +18,7 @@ import com.perrankana.marketup.android.MyApplicationTheme
 import com.perrankana.marketup.android.R
 import com.perrankana.marketup.android.compose.BackgroundCard
 import com.perrankana.marketup.android.viewmodels.StockViewModel
+import com.perrankana.marketup.stock.EditProduct
 import com.perrankana.marketup.stock.NewProduct
 import com.perrankana.marketup.stock.ShowStock
 import com.perrankana.marketup.stock.models.Product
@@ -37,13 +38,32 @@ fun StockScene() {
             },
             saveNewFormat = { newFormat ->
                 stockViewModel.saveNewFormat(newFormat)
+            },
+            saveProduct = { product ->
+                stockViewModel.saveProduct(product)
             }
-        ) { product ->
-            stockViewModel.saveProduct(product)
-        }
+        )
+        is EditProduct -> NewProductView(
+            product = data.product,
+            categoriesList = data.categories,
+            formats = data.formats,
+            saveNewCategory = { newCategory ->
+                stockViewModel.saveNewCategory(newCategory)
+            },
+            saveNewFormat = { newFormat ->
+                stockViewModel.saveNewFormat(newFormat)
+            },
+            saveProduct = { product ->
+                stockViewModel.saveProduct(product)
+            },
+            deleteProduct = { product ->
+                stockViewModel.deleteProduct(product)
+            }
+        )
         is ShowStock -> StockView(
             products = data.stock,
-            onNewProduct = { stockViewModel.onNewProduct() }
+            onNewProduct = { stockViewModel.onNewProduct() },
+            onProductClick = { stockViewModel.onProductSelected(it)}
         )
         else -> EmptyStockView {
             stockViewModel.onNewProduct()
@@ -54,12 +74,14 @@ fun StockScene() {
 @Composable
 fun StockView(
     products: List<Product>,
-    onNewProduct: () -> Unit
+    onNewProduct: () -> Unit,
+    onProductClick: (Product) -> Unit
 ) {
     StockListView(
         products = products,
         onNewProduct = onNewProduct,
-        onSearch = {}
+        onSearch = {},
+        onProductClick = onProductClick
     )
 }
 
