@@ -12,6 +12,7 @@ import com.perrankana.marketup.stock.ShowStock
 import com.perrankana.marketup.stock.StockSceneData
 import com.perrankana.marketup.stock.models.Product
 import com.perrankana.marketup.stock.usecases.DeleteProductUseCase
+import com.perrankana.marketup.stock.usecases.FilterProductsUseCase
 import com.perrankana.marketup.stock.usecases.GetNewProductDataUseCase
 import com.perrankana.marketup.stock.usecases.GetStockUseCase
 import com.perrankana.marketup.stock.usecases.SaveNewCategoryUseCase
@@ -28,7 +29,8 @@ class StockViewModel @Inject constructor(
     private val saveNewCategoryUseCase: SaveNewCategoryUseCase,
     private val saveNewFormatUseCase: SaveNewFormatUseCase,
     private val getNewProductDataUseCase: GetNewProductDataUseCase,
-    private val deleteProductUseCase: DeleteProductUseCase
+    private val deleteProductUseCase: DeleteProductUseCase,
+    private val filterProductsUseCase: FilterProductsUseCase,
 ) : ViewModel() {
 
     private val _stockSceneData: MutableLiveData<StockSceneData> = MutableLiveData(Empty)
@@ -43,10 +45,10 @@ class StockViewModel @Inject constructor(
         viewModelScope.launch {
             getStockUseCase().fold(onSuccess = {
                 it.collect {
-                    if (it.isEmpty()) {
+                    if (it.first.isEmpty()) {
                         _stockSceneData.value = Empty
                     } else {
-                        _stockSceneData.value = ShowStock(it)
+                        _stockSceneData.value = ShowStock(it.first, it.second, it.third)
                         Log.d("BANANAS", "stock= $it")
                     }
                 }
@@ -142,5 +144,23 @@ class StockViewModel @Inject constructor(
             )
         }
         getStockData()
+    }
+
+    fun onFilterProducts(categories: List<String>, filters: List<String>, stock: Int?) {
+        viewModelScope.launch {
+            filterProductsUseCase(categories, filters, stock).fold(
+                onSuccess = {
+                    it.collect {
+                        when (val stockData = _stockSceneData.value) {
+                            is ShowStock -> _stockSceneData.value = stockData.copy(stock = it)
+                            else -> Unit
+                        }
+                    }
+                },
+                onFailure = {
+
+                }
+            )
+        }
     }
 }

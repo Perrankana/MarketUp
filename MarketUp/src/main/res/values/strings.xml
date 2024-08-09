@@ -28,4 +28,6 @@
     <string name="save_this_offer">Save this Offer</string>
     <string name="delete">Delete</string>
     <string name="save">Save</string>
+    <string name="apply_filters">Apply filters</string>
+    <string name="clear_filters">Clear Filters</string>
 </resources>

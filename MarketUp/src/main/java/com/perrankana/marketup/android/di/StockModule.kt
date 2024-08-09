@@ -16,6 +16,8 @@ import com.perrankana.marketup.stock.repositories.StockRepository
 import com.perrankana.marketup.stock.repositories.StockRepositoryImpl
 import com.perrankana.marketup.stock.usecases.DeleteProductUseCase
 import com.perrankana.marketup.stock.usecases.DeleteProductUseCaseImpl
+import com.perrankana.marketup.stock.usecases.FilterProductsUseCase
+import com.perrankana.marketup.stock.usecases.FilterProductsUseCaseImpl
 import com.perrankana.marketup.stock.usecases.GetNewProductDataUseCase
 import com.perrankana.marketup.stock.usecases.GetNewProductDataUseCaseImpl
 import com.perrankana.marketup.stock.usecases.GetStockUseCase
@@ -39,8 +41,8 @@ import javax.inject.Singleton
 class StockModule {
 
     @Provides
-    fun provideGetStockUseCase(repository: StockRepository): GetStockUseCase {
-        return GetStockUseCaseImpl(repository)
+    fun provideGetStockUseCase(repository: StockRepository, categoryRepository: CategoryRepository, formatRepository: FormatRepository): GetStockUseCase {
+        return GetStockUseCaseImpl(repository, categoryRepository, formatRepository)
     }
 
     @Provides
@@ -66,6 +68,11 @@ class StockModule {
     @Provides
     fun provideDeleteProductUseCase(repository: StockRepository): DeleteProductUseCase {
         return DeleteProductUseCaseImpl(repository)
+    }
+
+    @Provides
+    fun provideFilterProductsUseCase(repository: StockRepository): FilterProductsUseCase {
+        return FilterProductsUseCaseImpl(repository)
     }
 
     @Provides

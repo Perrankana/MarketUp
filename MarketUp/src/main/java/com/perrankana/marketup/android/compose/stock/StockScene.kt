@@ -62,8 +62,13 @@ fun StockScene() {
         )
         is ShowStock -> StockView(
             products = data.stock,
+            categories = data.categories,
+            formats = data.formats,
             onNewProduct = { stockViewModel.onNewProduct() },
-            onProductClick = { stockViewModel.onProductSelected(it)}
+            onProductClick = { stockViewModel.onProductSelected(it)},
+            onFilterProducts = { cats, filters, stock ->
+                stockViewModel.onFilterProducts(cats, filters, stock)
+            }
         )
         else -> EmptyStockView {
             stockViewModel.onNewProduct()
@@ -74,14 +79,20 @@ fun StockScene() {
 @Composable
 fun StockView(
     products: List<Product>,
+    categories: List<String>,
+    formats: List<String>,
     onNewProduct: () -> Unit,
-    onProductClick: (Product) -> Unit
+    onProductClick: (Product) -> Unit,
+    onFilterProducts: (List<String>, List<String>, Int?) -> Unit
 ) {
     StockListView(
         products = products,
+        categories = categories,
+        formats = formats,
         onNewProduct = onNewProduct,
         onSearch = {},
-        onProductClick = onProductClick
+        onProductClick = onProductClick,
+        onFilterProducts = onFilterProducts
     )
 }
 

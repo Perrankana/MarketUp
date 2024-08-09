@@ -1,7 +1,9 @@
 package com.perrankana.marketup.android.compose.stock
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,13 +12,20 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Button
 import androidx.compose.material.Card
 import androidx.compose.material.Chip
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.FilterChip
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -27,10 +36,13 @@ import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -39,10 +51,15 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import coil.compose.AsyncImage
 import com.perrankana.marketup.android.MyApplicationTheme
@@ -55,14 +72,21 @@ import com.perrankana.marketup.stock.repositories.testProduct
 @Composable
 fun StockListView(
     products: List<Product>,
+    categories: List<String>,
+    formats: List<String>,
     onNewProduct: () -> Unit,
     onSearch: (String) -> Unit,
-    onProductClick: (Product) -> Unit
+    onProductClick: (Product) -> Unit,
+    onFilterProducts: (List<String>, List<String>, Int?) -> Unit
 ) {
+    var showFiltersDialog by remember { mutableStateOf(true) }
+
     Scaffold(
         topBar = {
             StockHeaderView(
-                onSearch = onSearch
+                onSearch = onSearch,
+                onFiltersClick = { showFiltersDialog = true },
+                onMagicClick = {}
             )
         },
         floatingActionButton = {
@@ -83,12 +107,32 @@ fun StockListView(
             }
         }
 
+        if (showFiltersDialog) {
+            FilterProductsView(
+                categories = categories,
+                formats = formats,
+                onFilter = { cats, filters, stock ->
+                    onFilterProducts(cats, filters, stock)
+                    showFiltersDialog = false
+                },
+                onClose = {
+                    showFiltersDialog = false
+                },
+                onClearFilters = {
+                    onFilterProducts(emptyList(), emptyList(), null)
+                    showFiltersDialog = false
+                }
+            )
+        }
+
     }
 }
 
 @Composable
 fun StockHeaderView(
-    onSearch: (String) -> Unit
+    onSearch: (String) -> Unit,
+    onFiltersClick: () -> Unit,
+    onMagicClick: () -> Unit
 ) {
     var searchQuery by rememberSaveable { mutableStateOf("") }
     val borderColor = MaterialTheme.colors.secondary
@@ -132,7 +176,9 @@ fun StockHeaderView(
         )
 
         Row(modifier = Modifier.align(Alignment.CenterVertically)) {
-            IconButton(onClick = { /*TODO*/ }) {
+            IconButton(onClick = {
+                onFiltersClick()
+            }) {
                 Icon(
                     painter = painterResource(id = R.drawable.baseline_filter_list_24),
                     contentDescription = null,
@@ -141,7 +187,9 @@ fun StockHeaderView(
             }
 
             IconButton(
-                onClick = { /*TODO*/ }) {
+                onClick = {
+                    onMagicClick()
+                }) {
                 Icon(
                     painter = painterResource(id = R.drawable.baseline_auto_fix_high_24),
                     contentDescription = null,
@@ -158,7 +206,8 @@ fun StockHeaderView(
 @Composable
 fun ProductItem(product: Product, onProductClick: (Product) -> Unit) {
     Card(
-        modifier = Modifier.padding(end = 20.dp, start = 20.dp)
+        modifier = Modifier
+            .padding(end = 20.dp, start = 20.dp)
             .clickable {
                 onProductClick(product)
             }
@@ -209,8 +258,8 @@ fun ProductItem(product: Product, onProductClick: (Product) -> Unit) {
                         .padding(8.dp)
                         .background(
                             color = if (product.stock == 0) {
-                                MaterialTheme.colors.error}
-                            else {
+                                MaterialTheme.colors.error
+                            } else {
                                 MaterialTheme.colors.secondary
                             },
                             shape = MaterialTheme.shapes.medium
@@ -289,7 +338,155 @@ fun ProductItem(product: Product, onProductClick: (Product) -> Unit) {
         }
     }
 }
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterialApi::class)
+@Composable
+fun FilterProductsView(
+    categories: List<String>,
+    formats: List<String>,
+    onFilter:(List<String>, List<String>, Int?) -> Unit,
+    onClose: () -> Unit,
+    onClearFilters: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight()
+            .background(color = colorResource(id = R.color.dark_overlay))
+    ) {
+        var selectedCategories by rememberSaveable { mutableStateOf(listOf<String>()) }
+        var selectedFormats by rememberSaveable { mutableStateOf(listOf<String>()) }
+        var stock by rememberSaveable { mutableStateOf("") }
 
+        Card(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .padding(20.dp)
+                .verticalScroll(ScrollState(0))
+        ) {
+            Icon(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(4.dp)
+                    .clickable {
+                        onClose()
+                    },
+                painter = painterResource(id = R.drawable.baseline_close_24),
+                contentDescription = ""
+            )
+            Column(
+                modifier = Modifier.padding(20.dp)
+            ) {
+                Text(text = stringResource(id = R.string.category))
+
+                Spacer(modifier = Modifier.padding(8.dp))
+
+                FlowRow {
+                    for (cat in categories){
+
+                        var selected by remember { mutableStateOf(false) }
+
+                        FilterChip(
+                            selected = selected,
+                            onClick = {
+                                selectedCategories = if (selected) {
+                                    selectedCategories.remove(cat)
+                                } else {
+                                    selectedCategories.add(cat)
+                                }
+                                selected = !selected
+                            },
+                            selectedIcon = {
+                                Icon(
+                                    imageVector = Icons.Filled.Done,
+                                    contentDescription = "Done icon",
+                                    modifier = Modifier.size(FilterChipDefaults.IconSize)
+                                )
+                            },
+                        ) {
+                            Text(cat)
+                        }
+                        Spacer(modifier = Modifier.padding(4.dp))
+                    }
+                }
+
+                Spacer(modifier = Modifier.padding(8.dp))
+
+                Text(text = stringResource(id = R.string.format))
+
+                Spacer(modifier = Modifier.padding(8.dp))
+
+                FlowRow {
+                    for (format in formats){
+                        var selected by remember { mutableStateOf(false) }
+
+                        FilterChip(
+                            selected = selected,
+                            onClick = {
+                                selectedFormats = if (selected) {
+                                    selectedFormats.remove(format)
+                                } else {
+                                    selectedFormats.add(format)
+                                }
+                                selected = !selected
+                            },
+                            selectedIcon = {
+                                Icon(
+                                    imageVector = Icons.Filled.Done,
+                                    contentDescription = "Done icon",
+                                    modifier = Modifier.size(FilterChipDefaults.IconSize)
+                                )
+                            },
+                        ) {
+                            Text(format)
+                        }
+                        Spacer(modifier = Modifier.padding(4.dp))
+                    }
+                }
+
+                Spacer(modifier = Modifier.padding(8.dp))
+
+                Text(text = stringResource(id = R.string.stock))
+                Spacer(modifier = Modifier.padding(4.dp))
+
+                TextField(
+                    value = stock,
+                    onValueChange = {
+                        stock = it
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Done,
+                        keyboardType = KeyboardType.Number
+                    )
+                )
+
+                Spacer(modifier = Modifier.padding(8.dp))
+
+                    Button(
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        onClick = {
+                            onFilter(
+                                selectedCategories,
+                                selectedFormats,
+                                stock.toIntOrNull()
+                            )
+                        }) {
+                        Text(text = stringResource(id = R.string.apply_filters))
+                    }
+
+                    Spacer(modifier = Modifier.padding(4.dp))
+
+                    Button(
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        onClick = {
+                            onClearFilters()
+                        }) {
+                        Text(text = stringResource(id = R.string.clear_filters))
+                    }
+
+            }
+        }
+    }
+}
 
 @Preview
 @Composable
@@ -297,9 +494,24 @@ fun StockListViewPreview() {
     MyApplicationTheme {
         StockListView(
             products = listOf(testProduct),
+            categories = listOf(),
+            formats = listOf(),
             onNewProduct = {},
             onSearch = {},
-            onProductClick = {}
+            onProductClick = {},
+            onFilterProducts = {_,_,_ -> }
         )
     }
+}
+
+fun <T> List<T>.add(t:T) : List<T>{
+    val temp = this.toMutableList()
+    temp.add(t)
+    return temp
+}
+
+fun <T> List<T>.remove(t:T) : List<T>{
+    val temp = this.toMutableList()
+    temp.remove(t)
+    return temp
 }
