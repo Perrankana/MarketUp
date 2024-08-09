@@ -79,7 +79,7 @@ fun StockListView(
     onProductClick: (Product) -> Unit,
     onFilterProducts: (List<String>, List<String>, Int?) -> Unit
 ) {
-    var showFiltersDialog by remember { mutableStateOf(true) }
+    var showFiltersDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
