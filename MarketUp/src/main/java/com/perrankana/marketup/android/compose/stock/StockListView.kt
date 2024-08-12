@@ -80,6 +80,9 @@ fun StockListView(
     onFilterProducts: (List<String>, List<String>, Int?) -> Unit
 ) {
     var showFiltersDialog by remember { mutableStateOf(false) }
+    var filterSelection by remember {
+        mutableStateOf(FilterSelection())
+    }
 
     Scaffold(
         topBar = {
@@ -111,14 +114,25 @@ fun StockListView(
             FilterProductsView(
                 categories = categories,
                 formats = formats,
-                onFilter = { cats, filters, stock ->
-                    onFilterProducts(cats, filters, stock)
+                filterSelection = filterSelection,
+                onFilter = { cats, formats, stock ->
+                    filterSelection = filterSelection.copy(
+                        categories = cats,
+                        formats = formats,
+                        stock = stock
+                    )
+                    onFilterProducts(cats, formats, stock)
                     showFiltersDialog = false
                 },
                 onClose = {
                     showFiltersDialog = false
                 },
                 onClearFilters = {
+                    filterSelection = filterSelection.copy(
+                        categories = emptyList(),
+                        formats = emptyList(),
+                        stock = null
+                    )
                     onFilterProducts(emptyList(), emptyList(), null)
                     showFiltersDialog = false
                 }
@@ -343,6 +357,7 @@ fun ProductItem(product: Product, onProductClick: (Product) -> Unit) {
 fun FilterProductsView(
     categories: List<String>,
     formats: List<String>,
+    filterSelection: FilterSelection,
     onFilter:(List<String>, List<String>, Int?) -> Unit,
     onClose: () -> Unit,
     onClearFilters: () -> Unit
@@ -353,9 +368,9 @@ fun FilterProductsView(
             .fillMaxHeight()
             .background(color = colorResource(id = R.color.dark_overlay))
     ) {
-        var selectedCategories by rememberSaveable { mutableStateOf(listOf<String>()) }
-        var selectedFormats by rememberSaveable { mutableStateOf(listOf<String>()) }
-        var stock by rememberSaveable { mutableStateOf("") }
+        var selectedCategories by rememberSaveable { mutableStateOf(filterSelection.categories) }
+        var selectedFormats by rememberSaveable { mutableStateOf(filterSelection.formats) }
+        var stock by rememberSaveable { mutableStateOf(filterSelection.stock?.toString().orEmpty() ) }
 
         Card(
             modifier = Modifier
@@ -383,7 +398,7 @@ fun FilterProductsView(
                 FlowRow {
                     for (cat in categories){
 
-                        var selected by remember { mutableStateOf(false) }
+                        var selected by remember { mutableStateOf(selectedCategories.contains(cat)) }
 
                         FilterChip(
                             selected = selected,
@@ -417,7 +432,7 @@ fun FilterProductsView(
 
                 FlowRow {
                     for (format in formats){
-                        var selected by remember { mutableStateOf(false) }
+                        var selected by remember { mutableStateOf(selectedFormats.contains(format)) }
 
                         FilterChip(
                             selected = selected,
@@ -515,3 +530,9 @@ fun <T> List<T>.remove(t:T) : List<T>{
     temp.remove(t)
     return temp
 }
+
+data class FilterSelection (
+    val categories: List<String> = emptyList(),
+    val formats : List<String> = emptyList(),
+    val stock: Int? = null
+)
