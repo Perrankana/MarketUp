@@ -3,7 +3,6 @@ package com.perrankana.marketup.android.compose.stock
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -83,11 +82,16 @@ fun StockListView(
     var filterSelection by remember {
         mutableStateOf(FilterSelection())
     }
+    var searchQuery by rememberSaveable { mutableStateOf("") }
 
     Scaffold(
         topBar = {
             StockHeaderView(
-                onSearch = onSearch,
+                searchQuery = searchQuery,
+                onSearch = {
+                    searchQuery = it
+                    onSearch(it)
+                },
                 onFiltersClick = { showFiltersDialog = true },
                 onMagicClick = {}
             )
@@ -144,11 +148,12 @@ fun StockListView(
 
 @Composable
 fun StockHeaderView(
+    searchQuery: String,
     onSearch: (String) -> Unit,
     onFiltersClick: () -> Unit,
     onMagicClick: () -> Unit
 ) {
-    var searchQuery by rememberSaveable { mutableStateOf("") }
+    var query by rememberSaveable { mutableStateOf(searchQuery) }
     val borderColor = MaterialTheme.colors.secondary
     Row(modifier = Modifier
         .fillMaxWidth()
@@ -165,10 +170,10 @@ fun StockHeaderView(
     ) {
         TextField(
             modifier = Modifier.weight(1f),
-            value = searchQuery,
+            value = query,
             onValueChange = {
-                searchQuery = it
-                onSearch(searchQuery)
+                query = it
+                onSearch(query)
             },
             placeholder = {
                 Text(text = "Search", color = MaterialTheme.colors.onPrimary)

@@ -18,6 +18,7 @@ import com.perrankana.marketup.stock.usecases.GetStockUseCase
 import com.perrankana.marketup.stock.usecases.SaveNewCategoryUseCase
 import com.perrankana.marketup.stock.usecases.SaveNewFormatUseCase
 import com.perrankana.marketup.stock.usecases.SaveProductUseCase
+import com.perrankana.marketup.stock.usecases.SearchProductsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -31,6 +32,7 @@ class StockViewModel @Inject constructor(
     private val getNewProductDataUseCase: GetNewProductDataUseCase,
     private val deleteProductUseCase: DeleteProductUseCase,
     private val filterProductsUseCase: FilterProductsUseCase,
+    private val searchStockUseCase: SearchProductsUseCase
 ) : ViewModel() {
 
     private val _stockSceneData: MutableLiveData<StockSceneData> = MutableLiveData(Empty)
@@ -149,6 +151,24 @@ class StockViewModel @Inject constructor(
     fun onFilterProducts(categories: List<String>, filters: List<String>, stock: Int?) {
         viewModelScope.launch {
             filterProductsUseCase(categories, filters, stock).fold(
+                onSuccess = {
+                    it.collect {
+                        when (val stockData = _stockSceneData.value) {
+                            is ShowStock -> _stockSceneData.value = stockData.copy(stock = it)
+                            else -> Unit
+                        }
+                    }
+                },
+                onFailure = {
+
+                }
+            )
+        }
+    }
+
+    fun onSearch(searchQuery: String) {
+        viewModelScope.launch {
+            searchStockUseCase(searchQuery).fold(
                 onSuccess = {
                     it.collect {
                         when (val stockData = _stockSceneData.value) {

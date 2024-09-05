@@ -65,6 +65,7 @@ fun StockScene() {
             categories = data.categories,
             formats = data.formats,
             onNewProduct = { stockViewModel.onNewProduct() },
+            onSearch = { stockViewModel.onSearch(it)},
             onProductClick = { stockViewModel.onProductSelected(it)},
             onFilterProducts = { cats, filters, stock ->
                 stockViewModel.onFilterProducts(cats, filters, stock)
@@ -82,6 +83,7 @@ fun StockView(
     categories: List<String>,
     formats: List<String>,
     onNewProduct: () -> Unit,
+    onSearch: (String) -> Unit,
     onProductClick: (Product) -> Unit,
     onFilterProducts: (List<String>, List<String>, Int?) -> Unit
 ) {
@@ -90,7 +92,7 @@ fun StockView(
         categories = categories,
         formats = formats,
         onNewProduct = onNewProduct,
-        onSearch = {},
+        onSearch = onSearch,
         onProductClick = onProductClick,
         onFilterProducts = onFilterProducts
     )

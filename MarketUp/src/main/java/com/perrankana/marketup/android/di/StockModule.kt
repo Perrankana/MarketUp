@@ -28,6 +28,8 @@ import com.perrankana.marketup.stock.usecases.SaveNewFormatUseCase
 import com.perrankana.marketup.stock.usecases.SaveNewFormatUseCaseImpl
 import com.perrankana.marketup.stock.usecases.SaveProductUseCase
 import com.perrankana.marketup.stock.usecases.SaveProductUseCaseImpl
+import com.perrankana.marketup.stock.usecases.SearchProductsUseCase
+import com.perrankana.marketup.stock.usecases.SearchProductsUseCaseImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -73,6 +75,11 @@ class StockModule {
     @Provides
     fun provideFilterProductsUseCase(repository: StockRepository): FilterProductsUseCase {
         return FilterProductsUseCaseImpl(repository)
+    }
+
+    @Provides
+    fun provideSearchProductsUseCase(repository: StockRepository): SearchProductsUseCase {
+        return SearchProductsUseCaseImpl(repository)
     }
 
     @Provides
