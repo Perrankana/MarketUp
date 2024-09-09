@@ -30,4 +30,10 @@
     <string name="save">Save</string>
     <string name="apply_filters">Apply filters</string>
     <string name="clear_filters">Clear Filters</string>
+    <string name="expenses">Expenses</string>
+    <string name="stand">Stand</string>
+    <string name="travel">Travel</string>
+    <string name="other">Other</string>
+    <string name="start">Start</string>
+    <string name="startEvent">Are you ready to start %s event?</string>
 </resources>

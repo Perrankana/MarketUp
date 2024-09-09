@@ -6,11 +6,20 @@ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 
-@Database(entities = [ProductEntity::class, CategoryEntity::class, FormatEntity::class], version = 1)
+@Database(
+    entities = [
+        ProductEntity::class,
+        CategoryEntity::class,
+        FormatEntity::class,
+        EventEntity::class
+    ],
+    version = 1
+)
 abstract class AppDatabase: RoomDatabase() {
     abstract fun getProductDao(): ProductDao
     abstract fun getCategoryDao(): CategoryDao
     abstract fun getFormatDao(): FormatDao
+    abstract fun getEventsDao(): EventsDao
 }
 
 fun getRoomDatabase(

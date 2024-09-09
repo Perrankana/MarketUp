@@ -7,6 +7,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.perrankana.marketup.android.compose.event.EventScene
 import com.perrankana.marketup.android.compose.stock.StockScene
 
 @Composable
@@ -29,7 +30,9 @@ fun MarketUpNavHost(
             )
         }
         composable(route = Screen.Event.route) {
-            EventScene()
+            EventScene(
+                onStartEvent = { }
+            )
         }
         composable(route = Screen.Stock.route) {
             StockScene()

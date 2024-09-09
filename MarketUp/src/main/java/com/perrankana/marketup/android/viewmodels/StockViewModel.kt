@@ -51,7 +51,6 @@ class StockViewModel @Inject constructor(
                         _stockSceneData.value = Empty
                     } else {
                         _stockSceneData.value = ShowStock(it.first, it.second, it.third)
-                        Log.d("BANANAS", "stock= $it")
                     }
                 }
             }, onFailure = {
@@ -71,7 +70,9 @@ class StockViewModel @Inject constructor(
                         )
                     }
                 },
-                onFailure = {}
+                onFailure = {
+                    Log.e(TAG, "[onNewProduct] Failed = ${it.message}")
+                }
             )
         }
     }
@@ -83,7 +84,7 @@ class StockViewModel @Inject constructor(
 
                 },
                 onFailure = {
-                    Log.e("BANANAS", "[saveProduct] Failed = ${it.message}")
+                    Log.e(TAG, "[saveProduct] Failed = ${it.message}")
                 }
             )
         }
@@ -141,7 +142,7 @@ class StockViewModel @Inject constructor(
 
                 },
                 onFailure = {
-                    Log.e("BANANAS", "[deleteProduct] Failed = ${it.message}")
+                    Log.e(TAG, "[deleteProduct] Failed = ${it.message}")
                 }
             )
         }
@@ -160,7 +161,7 @@ class StockViewModel @Inject constructor(
                     }
                 },
                 onFailure = {
-
+                    Log.e(TAG, "[onFilterProducts]", it)
                 }
             )
         }
@@ -182,5 +183,9 @@ class StockViewModel @Inject constructor(
                 }
             )
         }
+    }
+
+    companion object {
+        const val TAG = "StockView"
     }
 }
