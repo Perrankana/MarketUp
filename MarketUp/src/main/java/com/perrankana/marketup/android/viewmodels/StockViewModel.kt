@@ -40,6 +40,7 @@ class StockViewModel @Inject constructor(
         get() = _stockSceneData
 
     init {
+        Log.d(TAG, "[init]")
         getStockData()
     }
 
@@ -47,13 +48,19 @@ class StockViewModel @Inject constructor(
         viewModelScope.launch {
             getStockUseCase().fold(onSuccess = {
                 it.collect {
-                    if (it.first.isEmpty()) {
-                        _stockSceneData.value = Empty
-                    } else {
-                        _stockSceneData.value = ShowStock(it.first, it.second, it.third)
+                    Log.d(TAG, "[getStockData] ${it}")
+                    when(_stockSceneData.value){
+                        is ShowStock,
+                        Empty -> if (it.first.isEmpty()) {
+                            _stockSceneData.value = Empty
+                        } else {
+                            _stockSceneData.value = ShowStock(it.first, it.second, it.third)
+                        }
+                        else -> Unit
                     }
                 }
             }, onFailure = {
+                Log.e(TAG, "[getStockData] ${it.message}")
                 _stockSceneData.value = Empty
             })
         }
@@ -64,6 +71,7 @@ class StockViewModel @Inject constructor(
             getNewProductDataUseCase().fold(
                 onSuccess = { result ->
                     result.collect {
+                    Log.d(TAG, "[onNewProduct] Failed = ${it}")
                         _stockSceneData.value = NewProduct(
                             categories = it.first,
                             formats = it.second
@@ -81,14 +89,17 @@ class StockViewModel @Inject constructor(
         viewModelScope.launch {
             saveProductUseCase(product).fold(
                 onSuccess = {
-
+                    _stockSceneData.value = ShowStock(
+                        stock = emptyList(),
+                        categories = emptyList(),
+                        formats = emptyList()
+                    )
                 },
                 onFailure = {
                     Log.e(TAG, "[saveProduct] Failed = ${it.message}")
                 }
             )
         }
-        getStockData()
     }
 
     fun saveNewCategory(newCategory: String) {
@@ -96,10 +107,18 @@ class StockViewModel @Inject constructor(
             saveNewCategoryUseCase(newCategory).fold(
                 onSuccess = { result ->
                     result.collect{
-                        _stockSceneData.value = (_stockSceneData.value as NewProduct).copy(categories = it)
+                        Log.d(TAG, "[saveNewCategory] = $it")
+                        _stockSceneData.value = when (val stockSceneData = _stockSceneData.value){
+                            is EditProduct -> stockSceneData.copy(categories = it)
+                            is NewProduct -> stockSceneData.copy(categories = it)
+                            is ShowStock -> stockSceneData.copy(categories = it)
+                            else -> stockSceneData
+                        }
                     }
                 },
-                onFailure = {}
+                onFailure = {
+                    Log.e(TAG, "[saveNewCategory] = ${it.message}")
+                }
             )
         }
     }
@@ -109,11 +128,18 @@ class StockViewModel @Inject constructor(
             saveNewFormatUseCase(newFormat).fold(
                 onSuccess = {result ->
                     result.collect {
-                        _stockSceneData.value =
-                            (_stockSceneData.value as NewProduct).copy(formats = it)
+                        Log.d(TAG, "[saveNewFormat] = $it")
+                        _stockSceneData.value = when (val stockSceneData = _stockSceneData.value){
+                            is EditProduct -> stockSceneData.copy(formats = it)
+                            is NewProduct -> stockSceneData.copy(formats = it)
+                            is ShowStock -> stockSceneData.copy(formats = it)
+                            else -> stockSceneData
+                        }
                     }
                 },
-                onFailure = {}
+                onFailure = {
+                    Log.e(TAG, "[saveNewFormat] = ${it.message}")
+                }
             )
         }
     }
@@ -139,14 +165,17 @@ class StockViewModel @Inject constructor(
         viewModelScope.launch {
             deleteProductUseCase(product).fold(
                 onSuccess = {
-
+                    _stockSceneData.value = ShowStock(
+                        stock = emptyList(),
+                        categories = emptyList(),
+                        formats = emptyList()
+                    )
                 },
                 onFailure = {
                     Log.e(TAG, "[deleteProduct] Failed = ${it.message}")
                 }
             )
         }
-        getStockData()
     }
 
     fun onFilterProducts(categories: List<String>, filters: List<String>, stock: Int?) {

@@ -1,5 +1,6 @@
 package com.perrankana.marketup.android.compose.stock
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -29,6 +30,7 @@ fun StockScene() {
     val stockViewModel: StockViewModel = hiltViewModel()
     val stockSceneData by stockViewModel.stockSceneData.observeAsState()
 
+    Log.d("StockScene", "stockSceneData= $stockSceneData")
     when (val data = stockSceneData) {
         is NewProduct -> NewProductView(
             categoriesList = data.categories,
