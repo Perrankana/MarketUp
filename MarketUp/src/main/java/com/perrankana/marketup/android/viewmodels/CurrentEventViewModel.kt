@@ -38,10 +38,10 @@ class CurrentEventViewModel @Inject constructor(
         viewModelScope.launch {
             getCurrentEventUseCase().fold(
                 onSuccess = {
-                    when (it.status){
+                    when (it.first.status){
                         Status.Ended -> Log.e(TAG, "[getCurrentEventData] event is Ended")
-                        Status.NotStarted -> _currentEventData.value = EditEvent(it)
-                        Status.Started -> _currentEventData.value = StartEvent(it)
+                        Status.NotStarted -> _currentEventData.value = EditEvent(it.first)
+                        Status.Started -> _currentEventData.value = StartEvent(it.second!!)
                     }
                 },
                 onFailure = {

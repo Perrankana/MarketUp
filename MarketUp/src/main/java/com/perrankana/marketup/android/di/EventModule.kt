@@ -12,6 +12,7 @@ import com.perrankana.marketup.events.useCases.SaveCurrentEventUseCase
 import com.perrankana.marketup.events.useCases.SaveCurrentEventUseCaseImpl
 import com.perrankana.marketup.events.useCases.StartCurrentEventUseCase
 import com.perrankana.marketup.events.useCases.StartCurrentEventUseCaseImpl
+import com.perrankana.marketup.sale.repositories.TpvEventRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -24,8 +25,8 @@ import javax.inject.Singleton
 class EventModule {
 
     @Provides
-    fun provideGetCurrentEventUseCase(repository: CurrentEventRepository) : GetCurrentEventUseCase {
-        return GetCurrentEventUseCaseImpl(repository)
+    fun provideGetCurrentEventUseCase(repository: CurrentEventRepository, tpvEventRepository: TpvEventRepository) : GetCurrentEventUseCase {
+        return GetCurrentEventUseCaseImpl(repository, tpvEventRepository)
     }
 
     @Provides
@@ -34,8 +35,8 @@ class EventModule {
     }
 
     @Provides
-    fun provideStartCurrentEventUseCase(repository: CurrentEventRepository): StartCurrentEventUseCase {
-        return StartCurrentEventUseCaseImpl(repository)
+    fun provideStartCurrentEventUseCase(repository: CurrentEventRepository, tpvEventRepository: TpvEventRepository): StartCurrentEventUseCase {
+        return StartCurrentEventUseCaseImpl(repository, tpvEventRepository)
     }
     @Provides
     fun provideCurrentEventRepository(eventsDao: EventsDao): CurrentEventRepository = CurrentEventRepositoryImpl(eventsDao)

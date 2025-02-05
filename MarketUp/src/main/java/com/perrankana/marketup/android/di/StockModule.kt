@@ -1,11 +1,9 @@
 package com.perrankana.marketup.android.di
 
 import android.content.Context
-import com.perrankana.marketup.database.AppDatabase
 import com.perrankana.marketup.database.CategoryDao
 import com.perrankana.marketup.database.FormatDao
 import com.perrankana.marketup.database.ProductDao
-import com.perrankana.marketup.database.getDatabaseBuilder
 import com.perrankana.marketup.stock.datasource.StockDataSource
 import com.perrankana.marketup.stock.datasource.getStockDataSource
 import com.perrankana.marketup.stock.repositories.CategoryRepository
@@ -35,7 +33,6 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import java.text.Normalizer.Form
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)

@@ -25,7 +25,7 @@ class DashboardViewModel @Inject constructor(val getCurrentEventUseCase: GetCurr
         viewModelScope.launch {
             getCurrentEventUseCase().fold(
                 onSuccess = {
-                    _dashboardData.value = DashboardData(it.name)
+                    _dashboardData.value = DashboardData(it.first.name)
                 },
                 onFailure = {
                     _dashboardData.value = DashboardData()

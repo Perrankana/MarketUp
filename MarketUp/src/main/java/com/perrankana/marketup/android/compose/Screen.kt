@@ -6,9 +6,10 @@ sealed class Screen(
     val route: String,
     val navArguments: List<NamedNavArgument> = emptyList()
 ) {
-    object Dashboard: Screen("dashboard")
+    data object Dashboard: Screen("dashboard")
 
-    object Profile: Screen("profile")
-    object Stock: Screen("stock")
-    object Event: Screen("event")
+    data object Profile: Screen("profile")
+    data object Stock: Screen("stock")
+    data object Event: Screen("event")
+    data object TPV: Screen("tpv")
 }

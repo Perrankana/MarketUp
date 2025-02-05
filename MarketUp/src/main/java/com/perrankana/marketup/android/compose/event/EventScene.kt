@@ -14,7 +14,7 @@ import com.perrankana.marketup.events.models.Event
 
 @Composable
 fun EventScene(
-    onStartEvent: (Event) -> Unit,
+    onStartEvent: () -> Unit,
     currentEventViewModel: CurrentEventViewModel = hiltViewModel()
 ) {
 
@@ -26,22 +26,22 @@ fun EventScene(
             saveEvent = { currentEventViewModel.saveEvent(it) },
             startEvent = {
                 currentEventViewModel.startEvent(it)
-                onStartEvent(it) }
+                onStartEvent() }
         )
         is StartEvent -> {
-            onStartEvent(data.event)
+            onStartEvent()
         }
         is AskStartEvent -> StartEventView(
             event = data.event,
             startEvent = {
                 currentEventViewModel.startEvent(it)
-                onStartEvent(it) }
+                onStartEvent() }
         )
         else -> NewEventView(
             saveEvent = { currentEventViewModel.saveEvent(it) },
             startEvent = {
                 currentEventViewModel.startEvent(it)
-                onStartEvent(it)
+                onStartEvent()
             }
         )
     }

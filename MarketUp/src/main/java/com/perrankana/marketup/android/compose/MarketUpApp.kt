@@ -9,6 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.perrankana.marketup.android.compose.event.EventScene
 import com.perrankana.marketup.android.compose.stock.StockScene
+import com.perrankana.marketup.android.compose.tpv.TPVScene
 
 @Composable
 fun MarketUpApp() {
@@ -31,7 +32,7 @@ fun MarketUpNavHost(
         }
         composable(route = Screen.Event.route) {
             EventScene(
-                onStartEvent = { }
+                onStartEvent = { navController.navigate(Screen.TPV.route) }
             )
         }
         composable(route = Screen.Stock.route) {
@@ -39,6 +40,11 @@ fun MarketUpNavHost(
         }
         composable(route = Screen.Profile.route) {
             ProfileScene()
+        }
+        composable(route = Screen.TPV.route) {
+            TPVScene {
+                navController.navigate(Screen.Stock.route)
+            }
         }
     }
 }
