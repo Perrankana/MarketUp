@@ -11,7 +11,9 @@ import kotlinx.coroutines.IO
         ProductEntity::class,
         CategoryEntity::class,
         FormatEntity::class,
-        EventEntity::class
+        EventEntity::class,
+        SoldItemEntity::class,
+        TpvEventEntity::class
     ],
     version = 1
 )
@@ -20,6 +22,8 @@ abstract class AppDatabase: RoomDatabase() {
     abstract fun getCategoryDao(): CategoryDao
     abstract fun getFormatDao(): FormatDao
     abstract fun getEventsDao(): EventsDao
+    abstract fun getSoldItemDao(): SoldItemDao
+    abstract fun getTpvEventDao(): TpvEventDao
 }
 
 fun getRoomDatabase(
