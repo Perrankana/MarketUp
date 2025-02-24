@@ -8,10 +8,14 @@ import com.perrankana.marketup.sale.datasource.SaleDataSource
 import com.perrankana.marketup.sale.datasource.getSaleDataSource
 import com.perrankana.marketup.sale.repositories.TpvEventRepository
 import com.perrankana.marketup.sale.repositories.TpvEventRepositoryImpl
+import com.perrankana.marketup.sale.usecases.GetFormatsUseCase
+import com.perrankana.marketup.sale.usecases.GetFormatsUseCaseImpl
+import com.perrankana.marketup.sale.usecases.GetProductsByCategoryAndFormatUseCase
+import com.perrankana.marketup.sale.usecases.GetProductsByCategoryAndFormatUseCaseImpl
 import com.perrankana.marketup.sale.usecases.GetTpvDataUseCase
 import com.perrankana.marketup.sale.usecases.GetTpvDataUseCaseImpl
-import com.perrankana.marketup.stock.datasource.StockDataSource
-import com.perrankana.marketup.stock.datasource.getStockDataSource
+import com.perrankana.marketup.sale.usecases.SellItemUseCase
+import com.perrankana.marketup.sale.usecases.SellItemUseCaseImpl
 import com.perrankana.marketup.stock.repositories.CategoryRepository
 import com.perrankana.marketup.stock.repositories.FormatRepository
 import com.perrankana.marketup.stock.repositories.StockRepository
@@ -28,13 +32,26 @@ class SaleModule {
 
     @Provides
     fun provideGetTpvDataUseCase(
-        stockRepository: StockRepository,
-        categoryRepository: CategoryRepository,
-        formatRepository: FormatRepository,
-        tpvEventRepository: TpvEventRepository
+        tpvEventRepository: TpvEventRepository,
+        categoryRepository: CategoryRepository
     ): GetTpvDataUseCase {
-        return GetTpvDataUseCaseImpl(stockRepository, categoryRepository, formatRepository, tpvEventRepository)
+        return GetTpvDataUseCaseImpl(tpvEventRepository, categoryRepository)
     }
+
+    @Provides
+    fun provideGetFormatsUseCase(
+        formatRepository: FormatRepository
+    ): GetFormatsUseCase {
+        return GetFormatsUseCaseImpl(formatRepository)
+    }
+
+    @Provides
+    fun provideGetProductsByCategoryAndFormatUseCase(stockRepository: StockRepository): GetProductsByCategoryAndFormatUseCase {
+        return GetProductsByCategoryAndFormatUseCaseImpl(stockRepository)
+    }
+
+    @Provides
+    fun provideSellItemUseCase(tpvEventRepository: TpvEventRepository, stockRepository: StockRepository) : SellItemUseCase = SellItemUseCaseImpl(tpvEventRepository, stockRepository)
 
     @Provides
     fun provideTpvEventRepository(

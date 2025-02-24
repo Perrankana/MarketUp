@@ -20,4 +20,5 @@ sealed class Offer {
     data class NxMOffer(val n: Int, val price: Float): Offer()
     @Serializable
     data class DiscountOffer(val discount: Int): Offer()
+    data object None: Offer()
 }

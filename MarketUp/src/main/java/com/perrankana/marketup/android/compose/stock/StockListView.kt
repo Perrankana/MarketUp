@@ -346,6 +346,7 @@ fun ProductItem(product: Product, onProductClick: (Product) -> Unit) {
                                 text = when (offer) {
                                     is Offer.DiscountOffer -> "${offer.discount}%"
                                     is Offer.NxMOffer -> "${offer.n} x ${offer.price}€"
+                                    else -> ""
                                 }
                             )
                         }

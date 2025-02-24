@@ -1,14 +1,6 @@
 package com.perrankana.marketup.sale.models
 
 import com.perrankana.marketup.events.models.Event
-import com.perrankana.marketup.stock.models.Product
-
-data class Tpv(
-    val products: List<Product>,
-    val categories: List<String>,
-    val formats: List<String>,
-    val tpvEvent: TpvEvent
-)
 
 data class TpvEvent(
     val id: Long = 0,

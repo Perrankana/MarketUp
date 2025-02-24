@@ -26,6 +26,9 @@ interface ProductDao {
 
     @Query("SELECT * FROM ProductEntity")
     fun getAllAsFlow(): Flow<List<ProductEntity>>
+
+    @Query("SELECT * FROM ProductEntity WHERE id = :id")
+    suspend fun select(id: Long): ProductEntity
 }
 
 @Entity

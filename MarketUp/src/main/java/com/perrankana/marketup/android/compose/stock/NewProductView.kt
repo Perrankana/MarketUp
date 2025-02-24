@@ -817,6 +817,7 @@ fun OffersListView(
                         )
                     }
                 }
+                else -> Unit
 
             }
             Spacer(modifier = Modifier.padding(4.dp))

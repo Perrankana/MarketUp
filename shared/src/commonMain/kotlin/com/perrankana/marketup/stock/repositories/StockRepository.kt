@@ -16,6 +16,8 @@ interface StockRepository {
     suspend fun saveProduct(product: Product)
 
     suspend fun deleteProduct(product: Product)
+
+    suspend fun getProduct(id: Long): Product
 }
 
 class StockRepositoryImpl(private val productDao: ProductDao): StockRepository {
@@ -37,6 +39,8 @@ class StockRepositoryImpl(private val productDao: ProductDao): StockRepository {
     override suspend fun deleteProduct(product: Product) {
         productDao.delete(product.toEntity())
     }
+
+    override suspend fun getProduct(id: Long): Product = productDao.select(id).toData()
 }
 
 val testProduct = Product(
