@@ -21,8 +21,6 @@ import com.perrankana.marketup.sale.usecases.SellItemUseCase
 import com.perrankana.marketup.stock.models.Offer
 import com.perrankana.marketup.stock.models.Product
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -97,7 +95,9 @@ class TPVViewModel @Inject constructor(
                                         totalSold = currentTpvSceneData.totalSold,
                                         selectedFormat = format,
                                         selectedCat = currentTpvSceneData.selectedCat,
-                                        products = it)
+                                        products = it,
+                                        filteredProducts = it,
+                                        quickSearch = quickSearch(it))
                                     else -> Unit
                                 }
 
@@ -163,8 +163,10 @@ class TPVViewModel @Inject constructor(
                                                 totalSold = tpvSceneData.totalSold,
                                                 offer = offer,
                                                 products = it,
+                                                filteredProducts = it,
                                                 selectedFormat = tpvSceneData.selectedFormat,
                                                 selectedProducts = listOf(tpvSceneData.product),
+                                                quickSearch = quickSearch(it)
                                             )
                                             else ->Unit
                                         }
@@ -185,6 +187,9 @@ class TPVViewModel @Inject constructor(
             else -> Unit
         }
     }
+
+    private fun quickSearch(it: List<Product>) =
+        it.map { it.name.first().uppercase() }.groupBy { it }.keys.toList()
 
     private fun sellProduct(products: List<Product>, offer: Offer) {
         viewModelScope.launch {
@@ -220,5 +225,20 @@ class TPVViewModel @Inject constructor(
 
     fun onContinueShopping() {
         getData()
+    }
+
+    fun onQuickSearch(query: String) {
+        when(val tpvSceneData = _tpvSceneData.value){
+            is ApplyOfferStep -> _tpvSceneData.value = tpvSceneData.copy(filteredProducts = tpvSceneData.products.filter { it.name.startsWith(query, ignoreCase = true) })
+            is ProductStep -> _tpvSceneData.value = tpvSceneData.copy(filteredProducts = tpvSceneData.products.filter { it.name.startsWith(query, ignoreCase = true) })
+            else -> Unit
+        }
+    }
+    fun onResetSearch() {
+        when(val tpvSceneData = _tpvSceneData.value){
+            is ApplyOfferStep -> _tpvSceneData.value = tpvSceneData.copy(filteredProducts = tpvSceneData.products)
+            is ProductStep -> _tpvSceneData.value = tpvSceneData.copy(filteredProducts = tpvSceneData.products)
+            else -> Unit
+        }
     }
 }
