@@ -1,5 +1,8 @@
 package com.perrankana.marketup.sale
 
+import com.perrankana.marketup.sale.models.SoldItem
+import com.perrankana.marketup.sale.models.SoldItemToDisplay
+import com.perrankana.marketup.sale.models.TpvEvent
 import com.perrankana.marketup.stock.models.Offer
 import com.perrankana.marketup.stock.models.Product
 
@@ -13,3 +16,4 @@ data class OfferStep(override val totalSold: Float, val product: Product, val se
 data class ApplyOfferStep(override val totalSold: Float, val offer: Offer, val products: List<Product>, val filteredProducts: List<Product>, val quickSearch: List<String>, val selectedProducts: List<Product>, val selectedFormat: String): TPVSceneData(totalSold)
 data class SoldStep(override val totalSold: Float, val productsSold: List<Product>, val selectedFormat: String): TPVSceneData(totalSold)
 data class Error(override val totalSold: Float, val exception: Throwable): TPVSceneData(totalSold)
+data class EndEvent(override val totalSold: Float, val eventName: String, val soldItems: List<SoldItemToDisplay>): TPVSceneData(totalSold)

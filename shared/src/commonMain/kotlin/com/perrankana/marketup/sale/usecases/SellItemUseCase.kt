@@ -7,6 +7,7 @@ import com.perrankana.marketup.sale.models.TpvEvent
 import com.perrankana.marketup.sale.repositories.TpvEventRepository
 import com.perrankana.marketup.stock.models.Offer
 import com.perrankana.marketup.stock.models.Product
+import com.perrankana.marketup.stock.models.display
 import com.perrankana.marketup.stock.repositories.StockRepository
 
 interface SellItemUseCase {
@@ -22,7 +23,7 @@ class SellItemUseCaseImpl(
         updateStock(products)
         tpvEventRepository.saveSoldItem(
             SoldItem(
-                tpvEventId = tpvEvent.id, products = products.map { it.id }, offer = offer.toString(), price = calculatedPrice
+                tpvEventId = tpvEvent.id, products = products.map { it.id }, offer = offer.display(), price = calculatedPrice
             )
         )
         tpvEventRepository.saveTpvEvent(tpvEvent.copy(totalSold = tpvEvent.totalSold + calculatedPrice))

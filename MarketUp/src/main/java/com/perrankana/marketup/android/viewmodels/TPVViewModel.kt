@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.perrankana.marketup.sale.ApplyOfferStep
 import com.perrankana.marketup.sale.CategoriesStep
+import com.perrankana.marketup.sale.EndEvent
 import com.perrankana.marketup.sale.Error
 import com.perrankana.marketup.sale.FormatStep
 import com.perrankana.marketup.sale.Idle
@@ -14,6 +15,7 @@ import com.perrankana.marketup.sale.OfferStep
 import com.perrankana.marketup.sale.ProductStep
 import com.perrankana.marketup.sale.SoldStep
 import com.perrankana.marketup.sale.TPVSceneData
+import com.perrankana.marketup.sale.usecases.EndEventUseCase
 import com.perrankana.marketup.sale.usecases.GetFormatsUseCase
 import com.perrankana.marketup.sale.usecases.GetProductsByCategoryAndFormatUseCase
 import com.perrankana.marketup.sale.usecases.GetTpvDataUseCase
@@ -29,7 +31,8 @@ class TPVViewModel @Inject constructor(
     private val getTpvEventData : GetTpvDataUseCase,
     private val getFormats: GetFormatsUseCase,
     private val getProductsByCategoryAndFormat: GetProductsByCategoryAndFormatUseCase,
-    private val sellItem: SellItemUseCase
+    private val sellItem: SellItemUseCase,
+    private val endEvent: EndEventUseCase
 ): ViewModel() {
 
     private val _tpvSceneData: MutableLiveData<TPVSceneData> = MutableLiveData(Idle())
@@ -239,6 +242,23 @@ class TPVViewModel @Inject constructor(
             is ApplyOfferStep -> _tpvSceneData.value = tpvSceneData.copy(filteredProducts = tpvSceneData.products)
             is ProductStep -> _tpvSceneData.value = tpvSceneData.copy(filteredProducts = tpvSceneData.products)
             else -> Unit
+        }
+    }
+
+    fun onEndEvent() {
+        viewModelScope.launch{
+            endEvent().fold(
+                onSuccess = {
+                    _tpvSceneData.value = EndEvent(
+                        totalSold = it.totalSold,
+                        eventName = it.eventName,
+                        soldItems = it.soldItems
+                    )
+                },
+                onFailure = {
+                    Log.e("TPV", "[onEndEvent] $it")
+                }
+            )
         }
     }
 }

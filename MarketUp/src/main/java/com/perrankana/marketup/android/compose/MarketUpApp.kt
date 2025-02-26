@@ -42,9 +42,12 @@ fun MarketUpNavHost(
             ProfileScene()
         }
         composable(route = Screen.TPV.route) {
-            TPVScene {
-                navController.navigate(Screen.Stock.route)
-            }
+            TPVScene(
+                onNewProduct = {navController.navigate(Screen.Stock.route)},
+                onClose = {
+                    navController.navigate(Screen.Dashboard.route)
+                }
+            )
         }
     }
 }

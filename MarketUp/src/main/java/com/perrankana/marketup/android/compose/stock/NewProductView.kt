@@ -64,6 +64,7 @@ import com.perrankana.marketup.android.R
 import com.perrankana.marketup.android.compose.BackgroundCard
 import com.perrankana.marketup.stock.models.Offer
 import com.perrankana.marketup.stock.models.Product
+import com.perrankana.marketup.stock.models.display
 import java.io.File
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalLayoutApi::class)
@@ -794,7 +795,7 @@ fun OffersListView(
                     Chip(onClick = {
                         removeOffer(offer)
                     }) {
-                        Text(text = "${offer.discount} %")
+                        Text(text = offer.display())
                         Icon(
                             modifier = Modifier
                                 .padding(2.dp)
@@ -807,7 +808,7 @@ fun OffersListView(
 
                 is Offer.NxMOffer -> {
                     Chip(onClick = {}) {
-                        Text(text = "${offer.n} x 1 = ${offer.price}€")
+                        Text(text = offer.display())
                         Icon(
                             modifier = Modifier
                                 .padding(2.dp)

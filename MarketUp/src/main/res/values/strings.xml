@@ -41,4 +41,5 @@
     <string name="not_enough_stock">Not enought stock available</string>
     <string name="cant_apply_offer">Can\'t apply this Offer</string>
     <string name="all">All</string>
+    <string name="back_to_dashboard">Back to Dashboard</string>
 </resources>

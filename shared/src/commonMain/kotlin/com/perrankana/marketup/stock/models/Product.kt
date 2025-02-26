@@ -22,3 +22,9 @@ sealed class Offer {
     data class DiscountOffer(val discount: Int): Offer()
     data object None: Offer()
 }
+
+fun Offer.display(): String = when(this){
+    is Offer.DiscountOffer -> "$discount %"
+    Offer.None -> ""
+    is Offer.NxMOffer -> "$n x $price€"
+}

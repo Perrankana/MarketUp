@@ -8,11 +8,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -48,6 +50,7 @@ import com.perrankana.marketup.android.compose.Background
 import com.perrankana.marketup.android.viewmodels.TPVViewModel
 import com.perrankana.marketup.sale.ApplyOfferStep
 import com.perrankana.marketup.sale.CategoriesStep
+import com.perrankana.marketup.sale.EndEvent
 import com.perrankana.marketup.sale.Error
 import com.perrankana.marketup.sale.FormatStep
 import com.perrankana.marketup.sale.Idle
@@ -57,12 +60,15 @@ import com.perrankana.marketup.sale.SoldStep
 import com.perrankana.marketup.sale.TPVSceneData
 import com.perrankana.marketup.sale.models.CanNotApplyOfferException
 import com.perrankana.marketup.sale.models.NoStockException
+import com.perrankana.marketup.sale.models.SoldItemToDisplay
 import com.perrankana.marketup.stock.models.Offer
 import com.perrankana.marketup.stock.models.Product
+import com.perrankana.marketup.stock.models.display
 
 @Composable
 fun TPVScene(
     onNewProduct: () -> Unit,
+    onClose: () -> Unit
 ) {
 
     val viewModel: TPVViewModel = hiltViewModel()
@@ -85,7 +91,9 @@ fun TPVScene(
     }, onContinueShopping = {
         viewModel.onContinueShopping()
     }, onEndEvent = {
-
+        viewModel.onEndEvent()
+    }, onClose = {
+        onClose()
     })
 }
 
@@ -100,7 +108,8 @@ fun TPVView(
     onOfferSelected: (Offer) -> Unit,
     onNewProduct: () -> Unit,
     onContinueShopping: () -> Unit,
-    onEndEvent: () -> Unit
+    onEndEvent: () -> Unit,
+    onClose:() -> Unit
 ) {
     Scaffold(topBar = {
         TPVHeaderView(totalSold = tpvSceneData.totalSold, onEndEvent = {
@@ -126,8 +135,9 @@ fun TPVView(
                         val borderColor = MaterialTheme.colors.secondary
 
                         val breadCrumb = when (tpvSceneData) {
-                            is CategoriesStep -> ""
+                            is CategoriesStep,
                             is Idle -> ""
+                            is EndEvent -> tpvSceneData.eventName
                             is FormatStep -> tpvSceneData.selectedCat
                             is ProductStep -> "${tpvSceneData.selectedCat} / ${tpvSceneData.selectedFormat}"
                             is OfferStep -> "${tpvSceneData.selectedCat} / ${tpvSceneData.selectedFormat} / ${tpvSceneData.product.name}"
@@ -141,10 +151,12 @@ fun TPVView(
                                 is CanNotApplyOfferException -> stringResource(R.string.cant_apply_offer)
                                 else -> tpvSceneData.exception.message.orEmpty()
                             }
+
+
                         }
 
                         val instructions = when (tpvSceneData) {
-                            is Error, is Idle -> ""
+                            is Error, is Idle, is EndEvent -> ""
 
                             is CategoriesStep -> "Select a Category"
                             is FormatStep -> "Select a Format"
@@ -183,9 +195,72 @@ fun TPVView(
 
                     is SoldStep -> TpvSoldStepView(tpvSceneData.productsSold, onContinueShopping)
                     is Error -> TpvErrorView(onContinueShopping)
+                    is EndEvent -> TpvEndEventView(tpvSceneData.soldItems, onClose)
                 }
             }
         }
+    }
+}
+
+@Composable
+fun TpvEndEventView(soldItems: List<SoldItemToDisplay>, onClose: () -> Unit) {
+    Column {
+        Button(modifier = Modifier.align(alignment = Alignment.CenterHorizontally), onClick = {
+            onClose()
+        }) {
+            Text(text = stringResource(id = R.string.back_to_dashboard))
+        }
+        LazyColumn(
+            contentPadding = PaddingValues(8.dp)
+        ) {
+            items(soldItems){
+                Card{
+                    Column(modifier = Modifier
+                        .fillMaxSize()
+                        ) {
+                        LazyRow {
+                            items(it.products) { product ->
+                                Card(
+                                    modifier = Modifier.height(50.dp).padding(4.dp)
+                                ) {
+                                    Box(modifier = Modifier
+                                        .fillMaxSize()
+                                        ) {
+                                        AsyncImage(
+                                            model = product.image?.toUri(), contentDescription = "", contentScale = ContentScale.Crop
+                                        )
+                                        Text(
+                                            modifier = Modifier.align(Alignment.Center).padding(8.dp), text = product.name, style = MaterialTheme.typography.h5, color = MaterialTheme.colors.secondary
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                        Box(modifier = Modifier.fillMaxWidth()) {
+                            Text(
+                                modifier = Modifier
+                                    .padding(start = 8.dp, top = 2.dp, bottom = 2.dp)
+                                    ,
+                                text = it.offer,
+                                style = MaterialTheme.typography.subtitle1,
+                                color = MaterialTheme.colors.onBackground
+                            )
+                            Text(
+                                modifier = Modifier
+                                    .padding(end = 8.dp, top = 2.dp, bottom = 2.dp)
+                                    .align(alignment = Alignment.CenterEnd),
+                                text = "${it.price}€",
+                                style = MaterialTheme.typography.h6,
+                                color = MaterialTheme.colors.secondary
+                            )
+
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+        }
+
     }
 }
 
@@ -296,7 +371,9 @@ fun TpvSoldStepView(products: List<Product>, onContinueShopping: () -> Unit) {
 
 @Composable
 fun TpvErrorView(onContinueShopping: () -> Unit) {
-    Column {
+    Column (
+        modifier = Modifier.fillMaxWidth()
+    ) {
         Button(modifier = Modifier.align(alignment = Alignment.CenterHorizontally), onClick = {
             onContinueShopping()
         }) {
@@ -363,9 +440,6 @@ fun ProductItemView(product: Product, action: ((Product) -> Unit)? = null) {
 
 @Composable
 fun CatFormatItemView(value: String, action: (String) -> Unit) {
-    Card(
-        modifier = Modifier.height(150.dp)
-    ) {
         Card(
             modifier = Modifier.height(150.dp)
         ) {
@@ -384,7 +458,6 @@ fun CatFormatItemView(value: String, action: (String) -> Unit) {
                 )
             }
         }
-    }
 }
 
 @Composable
@@ -405,9 +478,8 @@ fun TpvOffersStepView(product: Product, onOfferSelected: (Offer) -> Unit) {
                         onOfferSelected(it)
                     }) {
                     val offer = when (it) {
-                        is Offer.DiscountOffer -> "Discount ${it.discount}"
                         Offer.None -> "None"
-                        is Offer.NxMOffer -> "${it.n} x ${it.price}"
+                        else -> it.display()
                     }
                     Text(
                         modifier = Modifier
@@ -457,11 +529,9 @@ fun TPVHeaderView(
 
 @Preview
 @Composable
-fun StockPrevziew() {
+fun TPVPreview() {
     MyApplicationTheme {
-        TPVView(tpvSceneData = ProductStep(
-            0f, products = products, filteredProducts = products, quickSearch = quick(products), selectedFormat = "A4", selectedCat = "Fanart"
-        ),
+        TPVView(tpvSceneData = endEvent,
             onCategorySelected = {},
             onFormatSelected = {},
             onQuickSearch = {},
@@ -470,7 +540,8 @@ fun StockPrevziew() {
             onOfferSelected = {},
             onNewProduct = {},
             onContinueShopping = {},
-            onEndEvent = {})
+            onEndEvent = {},
+            onClose = {})
     }
 }
 
@@ -483,3 +554,22 @@ val products = listOf(
         name = "Iercoles", image = null, categories = emptyList(), format = "A4", cost = 1f, price = 8f, offers = listOf(), stock = 2
     )
 )
+
+val soldItem = SoldItemToDisplay(
+    products = products,
+    offer = "2 x 15€",
+    price = 15f
+)
+
+val productStep = ProductStep(
+        0f, products = products, filteredProducts = products, quickSearch = quick(products), selectedFormat = "A4", selectedCat = "Fanart"
+)
+
+val error = Error(0f, NoStockException())
+
+val endEvent = EndEvent(
+    totalSold = 200f,
+    eventName = "Fleamarket",
+    soldItems = listOf(soldItem, soldItem)
+)
+

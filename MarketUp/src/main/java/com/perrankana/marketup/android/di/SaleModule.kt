@@ -4,10 +4,13 @@ import android.content.Context
 import com.perrankana.marketup.database.EventsDao
 import com.perrankana.marketup.database.SoldItemDao
 import com.perrankana.marketup.database.TpvEventDao
+import com.perrankana.marketup.events.repositories.CurrentEventRepository
 import com.perrankana.marketup.sale.datasource.SaleDataSource
 import com.perrankana.marketup.sale.datasource.getSaleDataSource
 import com.perrankana.marketup.sale.repositories.TpvEventRepository
 import com.perrankana.marketup.sale.repositories.TpvEventRepositoryImpl
+import com.perrankana.marketup.sale.usecases.EndEventUseCase
+import com.perrankana.marketup.sale.usecases.EndEventUseCaseImpl
 import com.perrankana.marketup.sale.usecases.GetFormatsUseCase
 import com.perrankana.marketup.sale.usecases.GetFormatsUseCaseImpl
 import com.perrankana.marketup.sale.usecases.GetProductsByCategoryAndFormatUseCase
@@ -52,6 +55,9 @@ class SaleModule {
 
     @Provides
     fun provideSellItemUseCase(tpvEventRepository: TpvEventRepository, stockRepository: StockRepository) : SellItemUseCase = SellItemUseCaseImpl(tpvEventRepository, stockRepository)
+
+    @Provides
+    fun provideEndEventUseCase(tpvEventRepository: TpvEventRepository, stockRepository: StockRepository, currentEventRepository: CurrentEventRepository): EndEventUseCase = EndEventUseCaseImpl(tpvEventRepository, stockRepository, currentEventRepository)
 
     @Provides
     fun provideTpvEventRepository(
