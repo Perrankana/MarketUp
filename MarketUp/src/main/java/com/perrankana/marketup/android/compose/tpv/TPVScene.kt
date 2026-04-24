@@ -221,7 +221,9 @@ fun TpvEndEventView(soldItems: List<SoldItemToDisplay>, onClose: () -> Unit) {
                         LazyRow {
                             items(it.products) { product ->
                                 Card(
-                                    modifier = Modifier.height(50.dp).padding(4.dp)
+                                    modifier = Modifier
+                                        .height(50.dp)
+                                        .padding(4.dp)
                                 ) {
                                     Box(modifier = Modifier
                                         .fillMaxSize()
@@ -230,7 +232,9 @@ fun TpvEndEventView(soldItems: List<SoldItemToDisplay>, onClose: () -> Unit) {
                                             model = product.image?.toUri(), contentDescription = "", contentScale = ContentScale.Crop
                                         )
                                         Text(
-                                            modifier = Modifier.align(Alignment.Center).padding(8.dp), text = product.name, style = MaterialTheme.typography.h5, color = MaterialTheme.colors.secondary
+                                            modifier = Modifier
+                                                .align(Alignment.Center)
+                                                .padding(8.dp), text = product.name, style = MaterialTheme.typography.h5, color = MaterialTheme.colors.secondary
                                         )
                                     }
                                 }
@@ -516,9 +520,13 @@ fun TPVHeaderView(
             Text(
                 text = "$totalSold€", color = MaterialTheme.colors.onPrimary, style = MaterialTheme.typography.h6
             )
-            Button(onClick = {
-                onEndEvent()
-            }) {
+            Button(
+                modifier = Modifier.padding(4.dp),
+                elevation = null,
+                onClick = {
+                    onEndEvent()
+                }
+            ) {
                 Text(text = stringResource(id = R.string.end))
             }
         }

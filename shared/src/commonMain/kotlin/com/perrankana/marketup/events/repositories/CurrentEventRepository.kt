@@ -5,6 +5,7 @@ import com.perrankana.marketup.database.EventsDao
 import com.perrankana.marketup.events.models.Event
 import com.perrankana.marketup.events.models.EventExpenses
 import com.perrankana.marketup.events.models.Status
+import com.perrankana.marketup.sale.models.NoEventException
 
 interface CurrentEventRepository {
     suspend fun getCurrentEvent(): Event
@@ -13,7 +14,7 @@ interface CurrentEventRepository {
 }
 
 class CurrentEventRepositoryImpl(private val eventDao: EventsDao): CurrentEventRepository {
-    override suspend fun getCurrentEvent(): Event = eventDao.getCurrentEvent().toData()
+    override suspend fun getCurrentEvent(): Event = eventDao.getCurrentEvent()?.toData() ?: throw NoEventException()
 
     override suspend fun saveEvent(event: Event): Event {
         if (event.id == 0L){

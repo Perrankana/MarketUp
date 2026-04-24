@@ -17,8 +17,8 @@ class GetTpvDataUseCaseImpl(
 ) : GetTpvDataUseCase {
     override suspend fun invoke(): Result<Flow<Pair<TpvEvent, List<String>>>> = kotlin.runCatching {
         println("[GetTpvDataUseCase]")
+        val tpvEvent = tpvEventRepository.getTpvEvent()
         categoryRepository.getCategories().map {
-            val tpvEvent = tpvEventRepository.getTpvEvent()
             println("[GetTpvDataUseCase] tpvEvent = $tpvEvent")
             tpvEvent to it
         }

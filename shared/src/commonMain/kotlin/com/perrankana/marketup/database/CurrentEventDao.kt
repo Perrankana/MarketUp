@@ -22,7 +22,7 @@ interface EventsDao {
     suspend fun delete(item: EventEntity)
 
     @Query("SELECT * FROM EventEntity WHERE status != 2")
-    suspend fun getCurrentEvent(): EventEntity
+    suspend fun getCurrentEvent(): EventEntity?
 
     @Query("SELECT * FROM EventEntity")
     fun getAllAsFlow(): Flow<List<EventEntity>>

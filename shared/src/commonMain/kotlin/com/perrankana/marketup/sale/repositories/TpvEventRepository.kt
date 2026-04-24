@@ -7,6 +7,8 @@ import com.perrankana.marketup.database.TpvEventDao
 import com.perrankana.marketup.database.TpvEventEntity
 import com.perrankana.marketup.events.models.Event
 import com.perrankana.marketup.events.repositories.toData
+import com.perrankana.marketup.sale.models.NoEventException
+import com.perrankana.marketup.sale.models.NoTPVEventException
 import com.perrankana.marketup.sale.models.SoldItem
 import com.perrankana.marketup.sale.models.TpvEvent
 import kotlinx.serialization.json.Json
@@ -25,10 +27,12 @@ class TpvEventRepositoryImpl(
     private val soldItemDao: SoldItemDao
 ) : TpvEventRepository {
     override suspend fun getTpvEvent(): TpvEvent {
-        val event = eventDao.getCurrentEvent()
-        val tpvEvent = tpvEventDao.getTpvEvent(event.id)
-        val soldItems = soldItemDao.getSoldItemsInEvent(tpvEvent.id)
-        return tpvEvent.toData(event.toData(), soldItems.map { it.toData() })
+        eventDao.getCurrentEvent()?.let { event ->
+            tpvEventDao.getTpvEvent(event.id)?.let { tpvEvent ->
+                val soldItems = soldItemDao.getSoldItemsInEvent(tpvEvent.id)
+                return tpvEvent.toData(event.toData(), soldItems.map { it.toData() })
+            } ?: throw NoTPVEventException()
+        } ?: throw NoEventException()
     }
 
     override suspend fun saveTpvEvent(event: TpvEvent): TpvEvent {

@@ -22,7 +22,7 @@ interface TpvEventDao {
     suspend fun delete(item: TpvEventEntity)
 
     @Query("SELECT * FROM TpvEventEntity WHERE eventId = :id")
-    suspend fun getTpvEvent(id: Long): TpvEventEntity
+    suspend fun getTpvEvent(id: Long): TpvEventEntity?
 
     @Query("SELECT * FROM TpvEventEntity")
     fun getAllAsFlow(): Flow<List<TpvEventEntity>>
