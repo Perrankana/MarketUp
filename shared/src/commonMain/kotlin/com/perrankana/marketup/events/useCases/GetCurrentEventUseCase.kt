@@ -15,10 +15,15 @@ class GetCurrentEventUseCaseImpl(
     private val tpvEventRepository: TpvEventRepository
 ): GetCurrentEventUseCase {
     override suspend fun invoke(): Result<Pair<Event, TpvEvent?>> = kotlin.runCatching {
+        println("[GetCurrentEventUseCase]")
         val event = repository.getCurrentEvent()
-        val tpvEvent = if(event.status == Status.Started){
+        println("[GetCurrentEventUseCase] event = $event")
+        val tpvEvent = if (event.status == Status.Started) {
             tpvEventRepository.getTpvEvent()
-        } else { null }
+        } else {
+            null
+        }
+        println("[GetCurrentEventUseCase] tpvEvent = $tpvEvent")
         event to tpvEvent
     }
 }

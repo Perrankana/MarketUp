@@ -15,6 +15,7 @@ import com.perrankana.marketup.sale.OfferStep
 import com.perrankana.marketup.sale.ProductStep
 import com.perrankana.marketup.sale.SoldStep
 import com.perrankana.marketup.sale.TPVSceneData
+import com.perrankana.marketup.sale.models.NoTPVEventException
 import com.perrankana.marketup.sale.usecases.EndEventUseCase
 import com.perrankana.marketup.sale.usecases.GetFormatsUseCase
 import com.perrankana.marketup.sale.usecases.GetProductsByCategoryAndFormatUseCase
@@ -39,6 +40,8 @@ class TPVViewModel @Inject constructor(
     val tpvSceneData: LiveData<TPVSceneData>
         get() = _tpvSceneData
 
+    private var retry: Boolean = true
+
     init {
         getData()
     }
@@ -58,7 +61,11 @@ class TPVViewModel @Inject constructor(
                     }
                 },
                 onFailure = {
-                    Log.e("TPV", "[getData] ${it.message}")
+                    Log.e("TPV", "[getData] ${it.message}", it)
+                    if (it is NoTPVEventException && retry) {
+                        getData()
+                        retry = false
+                    }
                 }
             )
         }

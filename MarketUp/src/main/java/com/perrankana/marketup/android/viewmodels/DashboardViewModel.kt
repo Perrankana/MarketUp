@@ -1,5 +1,6 @@
 package com.perrankana.marketup.android.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -28,6 +29,7 @@ class DashboardViewModel @Inject constructor(val getCurrentEventUseCase: GetCurr
                     _dashboardData.value = DashboardData(it.first.name)
                 },
                 onFailure = {
+                    Log.e("Dashboard", "[getDashBoardData] $it", it)
                     _dashboardData.value = DashboardData()
                 }
             )

@@ -28,6 +28,7 @@ class TpvEventRepositoryImpl(
 ) : TpvEventRepository {
     override suspend fun getTpvEvent(): TpvEvent {
         eventDao.getCurrentEvent()?.let { event ->
+            println("[getTpvEvent] $event")
             tpvEventDao.getTpvEvent(event.id)?.let { tpvEvent ->
                 val soldItems = soldItemDao.getSoldItemsInEvent(tpvEvent.id)
                 return tpvEvent.toData(event.toData(), soldItems.map { it.toData() })
@@ -36,6 +37,7 @@ class TpvEventRepositoryImpl(
     }
 
     override suspend fun saveTpvEvent(event: TpvEvent): TpvEvent {
+        println("[saveTpvEvent] $event")
         if (event.id == 0L) {
             tpvEventDao.insert(event.toEntity())
         } else {

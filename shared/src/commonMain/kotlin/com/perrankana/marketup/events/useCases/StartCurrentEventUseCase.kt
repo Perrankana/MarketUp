@@ -15,8 +15,9 @@ class StartCurrentEventUseCaseImpl(
     private val tpvEventRepository: TpvEventRepository
 ) : StartCurrentEventUseCase {
     override suspend fun invoke(event: Event): Result<TpvEvent> = kotlin.runCatching {
-        val startedEvent = event.copy(status = Status.Started)
-        repository.saveEvent(startedEvent)
+        println("[StartCurrentEventUseCase]")
+        val startedEvent = repository.saveEvent(event.copy(status = Status.Started))
+        println("[StartCurrentEventUseCase] startedEvent $startedEvent")
         tpvEventRepository.saveTpvEvent(
             TpvEvent(
                 event = startedEvent,
